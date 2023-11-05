@@ -6,10 +6,10 @@ const ReviewSchema = new mongoose.Schema({
         ref: "User",
         required: [true, "User is required"]
     },
-    book: {
+    course: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Book",
-        required: [true, "Book is required"]
+        ref: "Course",
+        required: [true, "Course is required"]
     },
     rating: {
         type: Number,

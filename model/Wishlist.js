@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
-const CartSchema = new mongoose.Schema(
+
+const WishlistSchema = new mongoose.Schema(
     {
         learner: {
             type: mongoose.Schema.Types.ObjectId,
@@ -16,8 +17,6 @@ const CartSchema = new mongoose.Schema(
         timestamps: true,
     }
 );
-const Cart = mongoose.model("Cart", CartSchema);
-module.exports = Cart;
 
-
-    
+const Wishlist = mongoose.model("Wishlist", WishlistSchema);
+module.exports = Wishlist;

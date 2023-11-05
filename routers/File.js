@@ -1,10 +1,11 @@
 const express = require("express");
 const routes = express();
-const upload = require("../config/file");
+const {upload} = require("../config/file");
 const FileController = require("../controller/FileController");
-const {isValidUser} = require("../middleware/auth");
 
-routes.post("/upload-image",upload.single("file_to_upload"),isValidUser,FileController.uploadFile);
-routes.get("/get/:filepath",FileController.getFile);
+routes.post("/upload-image",upload.single("file_to_upload"),FileController.uploadImage);
+routes.get("/get/:key",FileController.getImage);
+// routes.post("/upload-course-thumbnail",upload.single("file_to_upload"),FileController.uploadCourseThumbnail);
+
 
 module.exports = routes;

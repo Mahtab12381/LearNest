@@ -9,14 +9,16 @@ app.use(express.urlencoded({ extended: true }));
 const cors = require("cors");
 app.use(cors({origin:'*'}));
 const AuthRouter = require("./routers/Auth");
-const BookRouter = require("./routers/Book");
 const CartRouter = require("./routers/Cart");
-const TransactionRouter = require("./routers/Transaction");
 const ReviewRouter = require("./routers/Review");
-const WalletRouter = require("./routers/Wallet");
 const UserRouter = require("./routers/User"); 
-const DiscountRouter = require("./routers/Discount");
+const CategoryRouter = require("./routers/Category");
+const CourseRouter = require("./routers/Course");
 const FileRouter = require("./routers/File");
+const ContentRouter = require("./routers/Content");
+const WishListRouter = require("./routers/WishList");
+const TransactionRouter = require("./routers/Transaction");
+const supportRouter = require("./routers/Support");
 const path = require("path");
 const morgan = require('morgan')
 const fs = require('fs');
@@ -54,14 +56,17 @@ app.set('views', path.join(__dirname, 'views'));
 
 
 app.use("/api/auth", AuthRouter);
-app.use("/api/books", BookRouter);
 app.use("/api/cart", CartRouter);
-app.use("/api/transaction", TransactionRouter);
 app.use("/api/reviews", ReviewRouter); 
-app.use("/api/wallet", WalletRouter);
 app.use("/api/user", UserRouter);
-app.use("/api/discount", DiscountRouter);
-app.use("/api/files",FileRouter);
+app.use("/api/category", CategoryRouter);
+app.use("/api/course", CourseRouter);
+app.use("/api/files", FileRouter);
+app.use("/api/content", ContentRouter);
+app.use("/api/wishlist", WishListRouter);
+app.use("/api/transaction", TransactionRouter);
+app.use("/api/support", supportRouter);
+
 
 
 app.use((err, req, res, next) => {

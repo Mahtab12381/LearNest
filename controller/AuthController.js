@@ -71,7 +71,7 @@ class Authcontroller {
       if (!user.email.status) {
         return response(res, HTTP_STATUS.FORBIDDEN, "Please verify your email");
       }
-      const tokenExpiration = "24h";
+      const tokenExpiration = "30h";
       const token = jsonWebtoken.sign({ data: user }, process.env.JWT_KEY, {
         expiresIn: tokenExpiration,
       });
@@ -104,7 +104,7 @@ class Authcontroller {
           path.join(__dirname, "../views/verifyemail.ejs"),
           { name, validationlink, port: process.env.PORT }
         );
-        sendEmail(email, "Account Verification", renderedHtml);
+        //sendEmail(email, "Account Verification", renderedHtml);
 
         return true;
       } catch (error) {
@@ -124,7 +124,7 @@ class Authcontroller {
         );
       }
 
-      const { name, email, address, password, country } = req.body;
+      const { name, email, address, password, country,role } = req.body;
 
       const existEmail = await Auth.findOne({ "email.id": email });
 
@@ -137,8 +137,7 @@ class Authcontroller {
 
           const updatedAuth = await Auth.findOneAndUpdate(
             { "email.id": email },
-            { $set: { password: hash } },
-            { $set: { country: country } }
+            { $set: { password: hash , country:country , role:role } }
           );
 
           const updateUser = await User.findOneAndUpdate(
@@ -171,6 +170,7 @@ class Authcontroller {
           password: hash,
           user: user._id,
           country: country,
+          role: role,
         });
         const sent = await sendVerifyEmail(email, name);
 

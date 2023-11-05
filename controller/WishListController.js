@@ -1,14 +1,13 @@
 const Course = require("../model/CourseClass");
 const User = require("../model/UserClass");
-const CartModel = require("../model/CartClass");
-const Progress = require("../model/ProgressClass");
+const Wishlist = require("../model/Wishlist");
 const { validationResult } = require("express-validator");
 
 const response = require("../utility/common");
 const HTTP_STATUS = require("../constants/statusCodes");
 const mongoose = require("mongoose");
 
-class CartController {
+class WishlistController {
     async add(req, res) {
          try {
             const errors = validationResult(req);
@@ -20,7 +19,7 @@ class CartController {
                     errors.array()
                 );
             }
-            const Cart = req.body;
+            const wishlist = req.body;
             const learner_id = req.user._id;
             if(learner_id){
                 const user = await User.findById(learner_id);
@@ -28,57 +27,40 @@ class CartController {
                     return response(res, HTTP_STATUS.BAD_REQUEST, "User not found");
                 }
             }
-            if(Cart.course){
-                const courses = await Course.find({_id:Cart.course});
+            if(wishlist.course){
+                const courses = await Course.find({_id:wishlist.course});
                 if(!courses){
                     return response(res, HTTP_STATUS.BAD_REQUEST, "Course not found");
                 }
             }
 
-            const extCourseProgress = await Progress.findOne({user: learner_id}).select("courseProgress");
-            if(extCourseProgress){
-                let matchedCourse = false;
-                extCourseProgress.courseProgress.forEach(course => {
-                    if(course.course == Cart.course){
-                        matchedCourse = true;
-                    }
-                });
-                if(matchedCourse){
-                    return response(
-                        res,
-                        HTTP_STATUS.BAD_REQUEST,
-                        "Course already enrolled"
-                    );
-                }
-            }
-            
-            const extCart = await CartModel.findOne({learner: learner_id});
+            const extWishlist = await Wishlist.findOne({learner: learner_id});
 
-            if (extCart && extCart.courses.includes(Cart.course)) {
+            if (extWishlist && extWishlist.courses.includes(wishlist.course)) {
                 return response(
                     res,
                     HTTP_STATUS.BAD_REQUEST,
-                    "Course already exists in Cart"
+                    "Course already exists in wishlist"
                 );
             }
-            if(extCart){
-                const updatedList = await CartModel.findByIdAndUpdate(extCart._id, { $push: { courses: Cart.course } }, {new: true});
+            if(extWishlist){
+                const updatedList = await Wishlist.findByIdAndUpdate(extWishlist._id, { $push: { courses: wishlist.course } }, {new: true});
                 if(!updatedList){
-                    return response(res, HTTP_STATUS.BAD_REQUEST, "Cart not updated");
+                    return response(res, HTTP_STATUS.BAD_REQUEST, "Wishlist not updated");
                 }
                 return response(
                     res,
                     HTTP_STATUS.CREATED,
-                    "Cart updated successfully",
+                    "Wishlist updated successfully",
                     updatedList
                 );
             }
-            const newCart = await CartModel.create({...Cart, learner: learner_id});
-            const updateList = await CartModel.findByIdAndUpdate(newCart._id, { $push: { courses: Cart.course } }, {new: true});
+            const newWishlist = await Wishlist.create({...wishlist, learner: learner_id});
+            const updateList = await Wishlist.findByIdAndUpdate(newWishlist._id, { $push: { courses: wishlist.course } }, {new: true});
             return response(
                 res,
                 HTTP_STATUS.CREATED,
-                "Cart added successfully",
+                "Wishlist added successfully",
                 updateList
             );
         } catch (e) {
@@ -90,28 +72,32 @@ class CartController {
         try {
             const learner_id = req.user._id;
             const course_id = req.params.id;
+            console.log(course_id);
+
             if (!mongoose.Types.ObjectId.isValid(course_id)) {
                 return response(res, HTTP_STATUS.BAD_REQUEST, "Invalid Id");
             }
-            const Cart = await CartModel.findOne({learner: learner_id});
-            if(!Cart){
-                return response(res, HTTP_STATUS.NOT_FOUND, "Cart not found");
+            const wishlist = await Wishlist.findOne({learner: learner_id});
+            if(!wishlist){
+                return response(res, HTTP_STATUS.NOT_FOUND, "Wishlist not found");
             }
-            const courses = Cart.courses;
+            const courses = wishlist.courses;
             if(!courses.includes(course_id)){
-                return response(res, HTTP_STATUS.NOT_FOUND, "Course not found in Cart");
+                return response(res, HTTP_STATUS.NOT_FOUND, "Course not found in WishList");
             }
+
             const updatedCourses = courses.filter(course => course != course_id);
-            const updateCart = await CartModel.findOneAndUpdate({learner: learner_id}, {courses: updatedCourses}, {new: true});
-            if(!updateCart){
-                return response(res, HTTP_STATUS.BAD_REQUEST, "Cart not updated");
+            console.log(updatedCourses);
+            const updateWishList = await Wishlist.findOneAndUpdate({learner: learner_id}, {courses: updatedCourses}, {new: true});
+            if(!updateWishList){
+                return response(res, HTTP_STATUS.BAD_REQUEST, "Wishlist not updated");
             }
 
             return response(
                 res,
                 HTTP_STATUS.OK,
                 "Course removed Successfully",
-                updateCart
+                updateWishList
             );
 
         }
@@ -120,67 +106,64 @@ class CartController {
         }
     }
 
-    async getMyCart(req, res) {
+    async getMyWishList(req, res) {
         try {
             const learner_id = req.user._id;
-            const Cart = await CartModel.findOne({learner: learner_id}).populate("courses" , "-reviews -contents -sections");
-            if(!Cart){
-                return response(res, HTTP_STATUS.NOT_FOUND, "No Item in Cart");
+            const wishlist = await Wishlist.findOne({learner: learner_id}).populate("courses" , "-reviews -contents -sections");
+            if(!wishlist){
+                return response(res, HTTP_STATUS.NOT_FOUND, "No Item in Wishlist");
             }
 
-            if(Cart.courses.length === 0){
-                return response(res, HTTP_STATUS.NOT_FOUND, "No Item in Cart");
+            if(wishlist.courses.length === 0){
+                return response(res, HTTP_STATUS.NOT_FOUND, "No Item in Wishlist");
             }
             return response(
                 res,
                 HTTP_STATUS.OK,
-                "Cart fetched successfully",
-                Cart
+                "Wishlist fetched successfully",
+                wishlist
             );
         } catch (e) {
             return response(res, HTTP_STATUS.INTERNAL_SERVER_ERROR, "Internal Error");
         }
     }
 
-    async getAllCart(req, res) {
+    async getAllWishList(req, res) {
         try {
-            const Carts = await CartModel.find().populate("courses" , "-reviews -contents -sections");
-            if(!Carts){
-                return response(res, HTTP_STATUS.NOT_FOUND, "No Item in Cart");
+            const wishlists = await Wishlist.find().populate("courses" , "-reviews -contents -sections");
+            if(!wishlists){
+                return response(res, HTTP_STATUS.NOT_FOUND, "No Item in Wishlist");
             }
             return response(
                 res,
                 HTTP_STATUS.OK,
-                "Cart fetched successfully",
-                Carts
+                "Wishlist fetched successfully",
+                wishlists
             );
         } catch (e) {
             return response(res, HTTP_STATUS.INTERNAL_SERVER_ERROR, "Internal Error");
         }
     }
 
-    async getCartById (req, res) {
+    async getWishListById (req, res) {
         try {
             const id = req.params.id;
             if (!mongoose.Types.ObjectId.isValid(id)) {
                 return response(res, HTTP_STATUS.BAD_REQUEST, "Invalid Id");
             }
-            const Cart = await CartModel.findById(id).populate("courses" , "-reviews -contents -sections");
-            if(!Cart){
-                return response(res, HTTP_STATUS.NOT_FOUND, "No Item in Cart");
+            const wishlist = await Wishlist.findById(id).populate("courses" , "-reviews -contents -sections");
+            if(!wishlist){
+                return response(res, HTTP_STATUS.NOT_FOUND, "No Item in Wishlist");
             }
             return response(
                 res,
                 HTTP_STATUS.OK,
-                "Cart fetched successfully",
-                Cart
+                "Wishlist fetched successfully",
+                wishlist
             );
         } catch (e) {
             return response(res, HTTP_STATUS.INTERNAL_SERVER_ERROR, "Internal Error");
         }
     }
 }
-
-
-
-module.exports = new CartController();
+module.exports = new WishlistController();

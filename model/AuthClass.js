@@ -19,8 +19,8 @@ const AuthSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        required: false,
-        default:'user'
+        required: [true, "Role is required"],   
+
     },
     user:{
         type: mongoose.Schema.Types.ObjectId,
