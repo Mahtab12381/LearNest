@@ -3,8 +3,9 @@ const routes = express();
 const CourseController = require('../controller/CourseController');
 const { courseValidator } = require('../middleware/Validation');
 const {isValidAdmin} = require("../middleware/auth");
+const {isValidInstructor}= require("../middleware/auth");
 
-routes.post('/add', courseValidator.add, CourseController.add);
+routes.post('/add', isValidInstructor,courseValidator.add, CourseController.add);
 routes.get('/all', CourseController.getAll);
 routes.get('/id/:id', CourseController.getById);
 routes.patch('/update/:id',courseValidator.update, CourseController.update);

@@ -71,7 +71,7 @@ class Authcontroller {
       if (!user.email.status) {
         return response(res, HTTP_STATUS.FORBIDDEN, "Please verify your email");
       }
-      const tokenExpiration = "30h";
+      const tokenExpiration = "30d";
       const token = jsonWebtoken.sign({ data: user }, process.env.JWT_KEY, {
         expiresIn: tokenExpiration,
       });

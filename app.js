@@ -19,6 +19,7 @@ const ContentRouter = require("./routers/Content");
 const WishListRouter = require("./routers/WishList");
 const TransactionRouter = require("./routers/Transaction");
 const supportRouter = require("./routers/Support");
+const assignmentRouter = require("./routers/Assignment");
 const path = require("path");
 const morgan = require('morgan')
 const fs = require('fs');
@@ -66,6 +67,7 @@ app.use("/api/content", ContentRouter);
 app.use("/api/wishlist", WishListRouter);
 app.use("/api/transaction", TransactionRouter);
 app.use("/api/support", supportRouter);
+app.use("/api/assignment", assignmentRouter);
 
 
 

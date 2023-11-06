@@ -518,18 +518,6 @@ const courseValidator = {
       .bail()
       .isString()
       .withMessage("Subcategory must be a string"),
-    body("created_by")
-      .exists()
-      .withMessage("Created by was not provided")
-      .bail()
-      .notEmpty()
-      .withMessage("Created by cannot be empty")
-      .bail()
-      .isString()
-      .withMessage("Created by must be a string")
-      .bail()
-      .isMongoId()
-      .withMessage("Created by must be a valid mongo id"),
     body("thumbnail")
       .exists()
       .withMessage("Thumbnail was not provided")
@@ -852,6 +840,171 @@ const supportValidator = {
   ]
 }
 
+const assignmentValidator = {
+  add:[
+    body('name')
+    .exists()
+    .withMessage("Name was not provided")
+    .bail()
+    .notEmpty()
+    .withMessage("Name cannot be empty")
+    .bail()
+    .isString()
+    .withMessage("Name must be a string")
+    .isLength({ max: 30 })
+    .withMessage("Name cannot be more than 30 characters"),
+    body('description')
+    .exists()
+    .withMessage("Description was not provided")
+    .bail()
+    .notEmpty()
+    .withMessage("Description cannot be empty")
+    .bail()
+    .isString()
+    .withMessage("Description must be a string")
+    .isLength({ max: 100 })
+    .withMessage("Description cannot be more than 100 characters"),
+    body('attachments')
+    .optional()
+    .bail()
+    .isArray()
+    .withMessage("Attachments must be an array")
+    .bail()
+    .custom((value) => {
+      if (value.length > 0) {
+        value.forEach((attachment) => {
+          if (typeof attachment !== "string") {
+            throw new Error("Attachment must be a string");
+          }
+          if(attachment.length > 100){
+            throw new Error("Attachment cannot be more than 100 characters");
+          }
+          if(attachment.length < 1){
+            throw new Error("Attachment cannot be empty");
+          }
+        });
+      }
+      return true;
+    }),
+    body('dueDate')
+    .exists()
+    .withMessage("Due date was not provided")
+    .bail()
+    .notEmpty()
+    .withMessage("Due date cannot be empty")
+    .bail()
+    .isString()
+    .withMessage("Due date must be a string")
+    .bail()
+    .isLength({ max: 100 })
+    .withMessage("Due date cannot be more than 100 characters"),
+    body('course')
+    .exists()
+    .withMessage("Course was not provided")
+    .bail()
+    .notEmpty()
+    .withMessage("Course cannot be empty")
+    .bail()
+    .isString()
+    .withMessage("Course must be a string")
+    .bail()
+    .isMongoId()
+    .withMessage("Course must be a valid mongo id"),
+  ],
+  update:[
+    body('name')
+    .optional()
+    .bail()
+    .notEmpty()
+    .withMessage("Name cannot be empty")
+    .bail()
+    .isString()
+    .withMessage("Name must be a string")
+    .isLength({ max: 30 })
+    .withMessage("Name cannot be more than 30 characters"),
+    body('description')
+    .optional()
+    .bail()
+    .notEmpty()
+    .withMessage("Description cannot be empty")
+    .bail()
+    .isString()
+    .withMessage("Description must be a string")
+    .isLength({ max: 100 })
+    .withMessage("Description cannot be more than 100 characters"),
+    body('attachments')
+    .optional()
+    .bail()
+    .isArray()
+    .withMessage("Attachments must be an array")
+    .bail()
+    .custom((value) => {
+      if (value.length > 0) {
+        value.forEach((attachment) => {
+          if (typeof attachment !== "string") {
+            throw new Error("Attachment must be a string");
+          }
+          if(attachment.length > 100){
+            throw new Error("Attachment cannot be more than 100 characters");
+          }
+          if(attachment.length < 1){
+            throw new Error("Attachment cannot be empty");
+          }
+        });
+      }
+      return true;
+    }),
+    body('dueDate')
+    .optional()
+    .bail()
+    .notEmpty()
+    .withMessage("Due date cannot be empty")
+    .bail()
+    .isString()
+    .withMessage("Due date must be a string")
+    .bail()
+    .isLength({ max: 100 })
+    .withMessage("Due date cannot be more than 100 characters"),
+    body('course')
+    .optional()
+    .bail()
+    .notEmpty()
+    .withMessage("Course cannot be empty")
+    .bail()
+    .isString()
+    .withMessage("Course must be a string")
+    .bail()
+    .isMongoId()
+    .withMessage("Course must be a valid mongo id"),
+  ],
+  score:[
+    body('score')
+    .exists()
+    .withMessage("Score was not provided")
+    .bail()
+    .notEmpty()
+    .withMessage("Score cannot be empty")
+    .bail()
+    .isNumeric()
+    .withMessage("Score must be a number")
+    .bail()
+    .isLength({ max: 6 })
+    .withMessage("Score cannot be more than 4 characters"),
+    body('feedback')
+    .exists()
+    .withMessage("Feedback was not provided")
+    .bail()
+    .notEmpty()
+    .withMessage("Feedback cannot be empty")
+    .bail()
+    .isString()
+    .withMessage("Feedback must be a string")
+    .bail()
+    .isLength({ max: 100 })
+    .withMessage("Feedback cannot be more than 100 characters"), 
+  ]
+}
+
 module.exports = {
   authvalidator,
   cartValidator,
@@ -862,5 +1015,6 @@ module.exports = {
   courseValidator,
   contentValidator,
   wishlistValidator,
-  supportValidator
+  supportValidator,
+  assignmentValidator
 };

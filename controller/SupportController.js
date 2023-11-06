@@ -25,7 +25,7 @@ class SupportClass {
         return response(res, HTTP_STATUS.BAD_REQUEST, "Course does not exist");
       }
 
-      if (req.user.role == "instructor") {
+      if (req.role == "instructor") {
         const extCourseinstructor = await Course.findOne({
           _id: course,
           created_by: req.user._id,
@@ -106,7 +106,7 @@ class SupportClass {
         return response(res, HTTP_STATUS.BAD_REQUEST, "Course does not exist");
       }
 
-      if (req.user.role == "instructor") {
+      if (req.role == "instructor") {
         const extCourseinstructor = await Course.findOne({
           _id: course,
           created_by: req.user._id,

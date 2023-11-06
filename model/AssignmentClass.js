@@ -29,7 +29,14 @@ const AssignmentSchema = new mongoose.Schema({
     isDeleted: {
         type: String,
         default: false
-    }
+    },
+    submissions:[
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Progress",
+            required: false
+        }
+    ]
 }, {
     timestamps: true
 });

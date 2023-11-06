@@ -73,6 +73,10 @@ const ProgressSchema = new mongoose.Schema({
             score: {
                 type: Number,
                 required: false
+            },
+            feedback: {
+                type: String,
+                required: false
             }
 
         }
