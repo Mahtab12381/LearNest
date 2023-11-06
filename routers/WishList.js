@@ -12,4 +12,5 @@ routes.get("/view",isValidLearner,WishListController.getMyWishList);
 routes.get("/view/all",isValidAdmin,WishListController.getAllWishList);
 routes.get("/view/:id",isValidAdmin,WishListController.getWishListById);
 
+
 module.exports = routes;

@@ -5,6 +5,7 @@ const { validationResult } = require("express-validator");
 const response = require("../utility/common");
 const HTTP_STATUS = require("../constants/statusCodes");
 const mongoose = require("mongoose");
+const Progress = require("../model/ProgressClass");
 
 class CourseController {
   async add(req, res) {
@@ -206,6 +207,7 @@ class CourseController {
       return response(res, HTTP_STATUS.INTERNAL_SERVER_ERROR, "Internal Error");
     }
   }
+
   async softDelete(req, res) {
     try {
       const id = req.params.id;
@@ -251,6 +253,40 @@ class CourseController {
         );
       }
       return response(res, HTTP_STATUS.NOT_FOUND, "No Course Found");
+    } catch (e) {
+      return response(res, HTTP_STATUS.INTERNAL_SERVER_ERROR, "Internal Error");
+    }
+  }
+
+  async getMyEnrolledCourses(req, res) {
+    try {
+      const userId = req.user._id;
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return response(res, HTTP_STATUS.BAD_REQUEST, errors.array());
+      }
+      const courses =  await Progress.find({
+        user: userId,
+      })
+        .select("courseProgress")
+        .populate({
+          path: "courseProgress.course",
+          select: "-__v",
+          match: { isDeleted: false, published: true },
+        })
+        .skip((page - 1) * limit)
+        .limit(limit);
+      if (courses.length > 0) {
+        return response(
+          res,
+          HTTP_STATUS.OK,
+          "Courses Data Received successfully",
+          courses
+        );
+      }
+      return response(res, HTTP_STATUS.NOT_FOUND, "No Courses Found");
     } catch (e) {
       return response(res, HTTP_STATUS.INTERNAL_SERVER_ERROR, "Internal Error");
     }

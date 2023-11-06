@@ -34,7 +34,7 @@ const ProgressSchema = new mongoose.Schema({
                 type: Boolean,
                 required: false
             },
-            completionDate: {
+            lastSubmittedDate: {
                 type: Date,
                 required: false
             },
@@ -49,7 +49,12 @@ const ProgressSchema = new mongoose.Schema({
             wrongAnswers: {
                 type:[Number],
                 required: false
+            },
+            exireAt:{
+                type: Date,
+                required: false
             }
+
         }
     ],
     assignmentProgress: [

@@ -74,6 +74,27 @@ class AssignmentClass {
         );
       }
 
+      if (req.role == "learner") {
+        const extCourseProgress = await Progress.findOne({
+          user: req.user._id,
+        }).select("courseProgress");
+        if (extCourseProgress) {
+          let matchedCourse = false;
+          extCourseProgress.courseProgress.forEach((course) => {
+            if (course.course.toString() == assignmentObj.course.toString()) {
+              matchedCourse = true;
+            }
+          });
+          if (!matchedCourse) {
+            return response(
+              res,
+              HTTP_STATUS.BAD_REQUEST,
+              "You are not enrolled"
+            );
+          }
+        }
+      }
+
       return response(res, HTTP_STATUS.OK, "Assignment found", assignmentObj);
     } catch (error) {
       return response(

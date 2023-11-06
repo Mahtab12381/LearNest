@@ -8,6 +8,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 const cors = require("cors");
 app.use(cors({origin:'*'}));
+
 const AuthRouter = require("./routers/Auth");
 const CartRouter = require("./routers/Cart");
 const ReviewRouter = require("./routers/Review");
@@ -20,6 +21,8 @@ const WishListRouter = require("./routers/WishList");
 const TransactionRouter = require("./routers/Transaction");
 const supportRouter = require("./routers/Support");
 const assignmentRouter = require("./routers/Assignment");
+const QuizRouter = require("./routers/Quiz");
+
 const path = require("path");
 const morgan = require('morgan')
 const fs = require('fs');
@@ -68,6 +71,7 @@ app.use("/api/wishlist", WishListRouter);
 app.use("/api/transaction", TransactionRouter);
 app.use("/api/support", supportRouter);
 app.use("/api/assignment", assignmentRouter);
+app.use("/api/quiz", QuizRouter);
 
 
 

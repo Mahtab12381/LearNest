@@ -1005,6 +1005,219 @@ const assignmentValidator = {
   ]
 }
 
+const quizValidator = {
+  add:[
+    body('name')
+    .exists()
+    .withMessage("Name was not provided")
+    .bail()
+    .notEmpty()
+    .withMessage("Name cannot be empty")
+    .bail()
+    .isString()
+    .withMessage("Name must be a string")
+    .isLength({ max: 30 })
+    .withMessage("Name cannot be more than 30 characters"),
+    body('description')
+    .exists()
+    .withMessage("Description was not provided")
+    .bail()
+    .notEmpty()
+    .withMessage("Description cannot be empty")
+    .bail()
+    .isString()
+    .withMessage("Description must be a string")
+    .isLength({ max: 100 })
+    .withMessage("Description cannot be more than 100 characters"),
+    body('questions')
+    .exists()
+    .withMessage("Questions was not provided")
+    .bail()
+    .notEmpty()
+    .withMessage("Questions cannot be empty")
+    .bail()
+    .isArray()
+    .withMessage("Questions must be an array")
+    .bail()
+    .custom((value) => {
+      if (value.length > 0) {
+        value.forEach((question) => {
+          if (typeof question.questionText !== "string") {
+            throw new Error("Question must be a string");
+          }
+          if(question.questionText.length > 100){
+            throw new Error("Question cannot be more than 100 characters");
+          }
+          if(question.questionText.length < 1){
+            throw new Error("Question cannot be empty");
+          }
+          if (typeof question.options !== "object") {
+            throw new Error("Options must be an array");
+          }
+          if(question.options.length < 1){
+            throw new Error("Options cannot be empty");
+          }
+          if (typeof question.correctAnswer !== "number") {
+            throw new Error("Correct Answer must be a Number");
+          }
+          if(question.correctAnswer.length > 100){
+            throw new Error("Correct Answer cannot be more than 100 characters");
+          }
+          if(question.correctAnswer.length < 1){
+            throw new Error("Correct Answer cannot be empty");
+          }
+        });
+      }
+      return true;
+    }
+    ), 
+    body('timeLimit')
+    .exists()
+    .withMessage("Time limit was not provided")
+    .bail()
+    .notEmpty()
+    .withMessage("Time limit cannot be empty")
+    .bail()
+    .isNumeric()
+    .withMessage("Time limit must be a number")
+    .bail()
+    .isLength({ max: 6 })
+    .withMessage("Time limit cannot be more than 4 characters"),
+    body('course')
+    .exists()
+    .withMessage("Course was not provided")
+    .bail()
+    .notEmpty()
+    .withMessage("Course cannot be empty")
+    .bail()
+    .isString()
+    .withMessage("Course must be a string")
+    .bail()
+    .isMongoId()
+    .withMessage("Course must be a valid mongo id"),
+  ],
+
+  update:[
+    body('name')
+    .optional()
+    .bail()
+    .notEmpty()
+    .withMessage("Name cannot be empty")
+    .bail()
+    .isString()
+    .withMessage("Name must be a string")
+    .isLength({ max: 30 })
+    .withMessage("Name cannot be more than 30 characters"),
+    body('description')
+    .optional()
+    .bail()
+    .notEmpty()
+    .withMessage("Description cannot be empty")
+    .bail()
+    .isString()
+    .withMessage("Description must be a string")
+    .isLength({ max: 100 })
+    .withMessage("Description cannot be more than 100 characters"),
+    body('questions')
+    .optional()
+    .bail()
+    .notEmpty()
+    .withMessage("Questions cannot be empty")
+    .bail()
+    .isArray()
+    .withMessage("Questions must be an array")
+    .bail()
+    .custom((value) => {
+      if (value.length > 0) {
+        value.forEach((question) => {
+          if (typeof question.questionText !== "string") {
+            throw new Error("Question must be a string");
+          }
+          if(question.questionText.length > 100){
+            throw new Error("Question cannot be more than 100 characters");
+          }
+          if(question.questionText.length < 1){
+            throw new Error("Question cannot be empty");
+          }
+          if (typeof question.options !== "object") {
+            throw new Error("Options must be an array");
+          }
+          if(question.options.length < 1){
+            throw new Error("Options cannot be empty");
+          }
+          if (typeof question.correctAnswer !== "number") {
+            throw new Error("Correct Answer must be a Number");
+          }
+          if(question.correctAnswer.length > 100){
+            throw new Error("Correct Answer cannot be more than 100 characters");
+          }
+          if(question.correctAnswer.length < 1){
+            throw new Error("Correct Answer cannot be empty");
+          }
+        });
+      }
+      return true;
+    }
+    ),
+    body('timeLimit')
+    .optional()
+    .bail()
+    .notEmpty()
+    .withMessage("Time limit cannot be empty")
+    .bail()
+    .isNumeric()
+    .withMessage("Time limit must be a number")
+    .bail()
+    .isLength({ max: 6 })
+    .withMessage("Time limit cannot be more than 4 characters"),
+    body('course')
+    .optional()
+    .bail()
+    .notEmpty()
+    .withMessage("Course cannot be empty")
+    .bail()
+    .isString()
+    .withMessage("Course must be a string")
+    .bail()
+    .isMongoId()
+    .withMessage("Course must be a valid mongo id"),
+  ],
+  submit:[
+    body('answers')
+    .exists()
+    .withMessage("Answers was not provided")
+    .bail()
+    .notEmpty()
+    .withMessage("Answers cannot be empty")
+    .bail()
+    .isArray()
+    .withMessage("Answers must be an array")
+    .bail()
+    .isLength({ max: 100 })
+    .withMessage("Answers cannot be more than 100 characters")
+    .custom((value) => {
+      if (value.length > 0) {
+        value.forEach((answer) => {
+          if (typeof answer !== "number") {
+            throw new Error("Answer must be a Number");
+          }
+          if(answer.length > 2){
+            throw new Error("Answer cannot be more than 2 characters");
+          }
+          if(answer.length < 1){
+            throw new Error("Answer cannot be empty");
+          }
+        });
+      }
+      if (value.length < 1) {
+        throw new Error("Answers cannot be empty");
+      }
+      return true;
+    }
+    ),
+  ]
+}
+
 module.exports = {
   authvalidator,
   cartValidator,
@@ -1016,5 +1229,6 @@ module.exports = {
   contentValidator,
   wishlistValidator,
   supportValidator,
-  assignmentValidator
+  assignmentValidator,
+  quizValidator
 };
