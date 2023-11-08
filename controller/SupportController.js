@@ -17,9 +17,6 @@ class SupportClass {
       }
       const { course, message } = req.body;
       const user = await User.findById(req.user._id);
-      if (!user) {
-        return response(res, HTTP_STATUS.BAD_REQUEST, "User not found");
-      }
       const extCourse = await Course.findById(course);
       if (!extCourse) {
         return response(res, HTTP_STATUS.BAD_REQUEST, "Course does not exist");

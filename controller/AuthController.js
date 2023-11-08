@@ -104,7 +104,7 @@ class Authcontroller {
           path.join(__dirname, "../views/verifyemail.ejs"),
           { name, validationlink, port: process.env.PORT }
         );
-        //sendEmail(email, "Account Verification", renderedHtml);
+        sendEmail(email, "Account Verification", renderedHtml);
 
         return true;
       } catch (error) {

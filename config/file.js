@@ -10,11 +10,26 @@ const s3 = new S3Client({
   },
   region: process.env.AWS_S3_REGION
 });
-const upload = multer({
+
+const uploadImage = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 10 * 1024 * 1024, // limit file size to 10MB
+  },
+});
+
+const uploadVideo = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 300 * 1024 * 1024, // limit file size to 300MB
+  },
+});
+
+const uploadDocks = multer({
   storage: multer.memoryStorage(),
   limits: {
     fileSize: 5 * 1024 * 1024, // limit file size to 5MB
   },
 });
 
-module.exports = { upload, s3 };
+module.exports = { uploadImage, s3 , uploadVideo ,uploadDocks};
