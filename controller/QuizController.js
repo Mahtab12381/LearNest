@@ -209,14 +209,6 @@ class QuizClass {
             "You are not the instructor of this course"
           );
         }
-        const quiz = await Quiz.find({
-          course: course,
-          isDeleted: false,
-        });
-        if (quiz.length == 0) {
-          return response(res, HTTP_STATUS.BAD_REQUEST, "There is no quiz");
-        }
-        return response(res, HTTP_STATUS.OK, "Quiz retrived succesfully", quiz);
       }
 
       if (req.role == "learner") {
@@ -238,15 +230,14 @@ class QuizClass {
             );
           }
         }
-        const quiz = await Quiz.find({
-          course: course,
-          isDeleted: false,
-        }).select("-questions.correctAnswer");
-        if (quiz.length == 0) {
-          return response(res, HTTP_STATUS.BAD_REQUEST, "There is no quiz");
-        }
-        return response(res, HTTP_STATUS.OK, "Quiz retrived succesfully", quiz);
       }
+
+      const quiz = await Quiz.find({ course: course, isDeleted: false });
+
+      if (quiz.length == 0) {
+        return response(res, HTTP_STATUS.BAD_REQUEST, "There is no quiz");
+      }
+      return response(res, HTTP_STATUS.OK, "Quiz retrived succesfully", quiz);
     } catch (err) {
       console.log(err);
       return response(res, HTTP_STATUS.INTERNAL_SERVER_ERROR, err);
@@ -293,9 +284,13 @@ class QuizClass {
       const expiryTime = await Progress.findOne({
         user: req.user._id,
         "quizProgress.quizId": req.params.id,
-      }).select("quizProgress.exireAt quizProgress.completed");
+      }).select("quizProgress.quizId quizProgress.exireAt quizProgress.completed");
 
-      if (expiryTime.quizProgress[0].exireAt < Date.now()) {
+      const extQuizbyLearner = expiryTime.quizProgress.filter((quiz) => {
+        return quiz.quizId.toString() == req.params.id.toString();
+      });
+
+      if (extQuizbyLearner[0].exireAt < Date.now()) {
         return response(
           res,
           HTTP_STATUS.BAD_REQUEST,
@@ -303,10 +298,9 @@ class QuizClass {
         );
       }
 
-      if (expiryTime.quizProgress[0].completed == true) {
+      if (extQuizbyLearner[0].completed == true) {
         return response(res, HTTP_STATUS.BAD_REQUEST, "Quiz already completed");
       }
-
       const correctAnswers = quiz.questions.map((question) => {
         return question.correctAnswer;
       });
@@ -317,7 +311,7 @@ class QuizClass {
         return response(
           res,
           HTTP_STATUS.BAD_REQUEST,
-          "You have to submit all the answers"
+          `${correctAnswers.length-submittedAnswers.length} answers left`
         );
       }
 
@@ -421,6 +415,7 @@ class QuizClass {
       if (extQuizzes) {
         let matchedQuiz = false;
         let completedQuiuz = false;
+        let attempts = 0;
         extQuizzes.quizProgress.forEach((quiz) => {
           if (
             quiz.quizId.toString() == req.params.id.toString() &&
@@ -433,6 +428,7 @@ class QuizClass {
             quiz.completed == false
           ) {
             matchedQuiz = true;
+            attempts = quiz.attempts; 
           }
         });
         if (completedQuiuz) {
@@ -450,8 +446,7 @@ class QuizClass {
             },
             {
               $set: {
-                "quizProgress.$.attempts":
-                  extQuizzes.quizProgress[0].attempts + 1,
+                "quizProgress.$.attempts":attempts+ 1,
                 "quizProgress.$.exireAt": Date.now() + quiz.timeLimit * 60000,
               },
             },
