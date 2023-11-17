@@ -16,7 +16,7 @@ const SupportSchema = new mongoose.Schema(
           },
           message: {
             type: String,
-          }
+          },
         },
         {
           timestamps: true,

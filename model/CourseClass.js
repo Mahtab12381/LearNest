@@ -19,6 +19,18 @@ const CourseSchema = new mongoose.Schema(
             type: String,
             required: false,
         },
+        language:{
+            type: String,
+            required: [true, "Language is required"],
+        },
+        level:{
+            type: String,
+            required: [true, "Level is required"],
+        },
+        tag:{
+            type: String,
+            required: [true, "Tag is required"],
+        },
         rating: {
             type: Number,
             required: false,

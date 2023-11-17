@@ -209,6 +209,14 @@ class QuizClass {
             "You are not the instructor of this course"
           );
         }
+        const quiz = await Quiz.find({
+          course: course,
+          isDeleted: false,
+        });
+        if (quiz.length == 0) {
+          return response(res, HTTP_STATUS.BAD_REQUEST, "There is no quiz");
+        }
+        return response(res, HTTP_STATUS.OK, "Quiz retrived succesfully", quiz);
       }
 
       if (req.role == "learner") {
@@ -230,14 +238,15 @@ class QuizClass {
             );
           }
         }
+        const quiz = await Quiz.find({
+          course: course,
+          isDeleted: false,
+        }).select("-questions.correctAnswer");
+        if (quiz.length == 0) {
+          return response(res, HTTP_STATUS.BAD_REQUEST, "There is no quiz");
+        }
+        return response(res, HTTP_STATUS.OK, "Quiz retrived succesfully", quiz);
       }
-
-      const quiz = await Quiz.find({ course: course, isDeleted: false });
-
-      if (quiz.length == 0) {
-        return response(res, HTTP_STATUS.BAD_REQUEST, "There is no quiz");
-      }
-      return response(res, HTTP_STATUS.OK, "Quiz retrived succesfully", quiz);
     } catch (err) {
       console.log(err);
       return response(res, HTTP_STATUS.INTERNAL_SERVER_ERROR, err);
@@ -281,6 +290,7 @@ class QuizClass {
         }
       }
 
+      console.log(req.params.id)
       const expiryTime = await Progress.findOne({
         user: req.user._id,
         "quizProgress.quizId": req.params.id,

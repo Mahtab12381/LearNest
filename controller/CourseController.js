@@ -39,7 +39,12 @@ class CourseController {
         newCourse
       );
     } catch (e) {
-      return response(res, HTTP_STATUS.INTERNAL_SERVER_ERROR, "Internal Error");
+      return response(
+        res,
+        HTTP_STATUS.INTERNAL_SERVER_ERROR,
+        "Internal Error",
+        e
+      );
     }
   }
 
@@ -78,6 +83,7 @@ class CourseController {
         return response(res, HTTP_STATUS.BAD_REQUEST, errors.array());
       }
       const courses = await Course.find({ isDeleted: false, published: true })
+        .populate("created_by", "name imageUrl")
         .select("-__v")
         .skip((page - 1) * limit)
         .limit(limit);
@@ -106,6 +112,8 @@ class CourseController {
         return response(res, HTTP_STATUS.BAD_REQUEST, "Invalid Id");
       }
       const course = await Course.findById(id)
+        .populate("category", "name")
+        .populate("created_by", "name imageUrl email")
         .populate("contents", "-__v")
         .select("-__v");
       if (course && course.published) {
@@ -267,7 +275,7 @@ class CourseController {
       if (!errors.isEmpty()) {
         return response(res, HTTP_STATUS.BAD_REQUEST, errors.array());
       }
-      const courses =  await Progress.find({
+      const courses = await Progress.find({
         user: userId,
       })
         .select("courseProgress")
