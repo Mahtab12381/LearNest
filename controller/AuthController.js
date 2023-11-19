@@ -258,9 +258,6 @@ class Authcontroller {
     }
   }
 
-
-
-
   async sendForgotPasswordEmail(req, res) {
     try {
       const errors = validationResult(req);

@@ -112,6 +112,14 @@ class CourseController {
         return response(res, HTTP_STATUS.BAD_REQUEST, "Invalid Id");
       }
       const course = await Course.findById(id)
+        .populate({
+          path: "reviews",
+          select: "-__v",
+          populate: {
+            path: "user",
+            select: "name imageUrl email",
+          },
+        })
         .populate("category", "name")
         .populate("created_by", "name imageUrl email")
         .populate("contents", "-__v")
@@ -143,6 +151,16 @@ class CourseController {
       }
 
       const course = await Course.findById(id)
+        .populate({
+          path: "reviews",
+          select: "-__v",
+          populate: {
+            path: "user",
+            select: "name imageUrl email",
+          },
+        })
+        .populate("category", "name")
+        .populate("created_by", "name imageUrl email")
         .populate("contents", "-__v")
         .select("-__v");
       if (course) {
@@ -284,6 +302,36 @@ class CourseController {
           select: "-__v",
           match: { isDeleted: false, published: true },
         })
+        .skip((page - 1) * limit)
+        .limit(limit);
+      if (courses.length > 0) {
+        return response(
+          res,
+          HTTP_STATUS.OK,
+          "Courses Data Received successfully",
+          courses
+        );
+      }
+      return response(res, HTTP_STATUS.NOT_FOUND, "No Courses Found");
+    } catch (e) {
+      return response(res, HTTP_STATUS.INTERNAL_SERVER_ERROR, "Internal Error");
+    }
+  }
+
+  async getMyCreatedCourses(req, res) {
+    try {
+      const userId = req.user._id;
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return response(res, HTTP_STATUS.BAD_REQUEST, errors.array());
+      }
+      const courses = await Course.find({
+        created_by: userId,
+      })
+        .populate("created_by", "name imageUrl email")
+        .select("-__v")
         .skip((page - 1) * limit)
         .limit(limit);
       if (courses.length > 0) {

@@ -496,8 +496,8 @@ const courseValidator = {
       .bail()
       .isString()
       .withMessage("Description must be a string")
-      .isLength({ max: 500 })
-      .withMessage("Description cannot be more than 500 characters"),
+      .isLength({ max: 10000 })
+      .withMessage("Description cannot be more than 10000 characters"),
     body("category")
       .exists()
       .withMessage("Category was not provided")
@@ -511,32 +511,14 @@ const courseValidator = {
       .isMongoId()
       .withMessage("Category must be a valid mongo id"),
     body("subcategory")
-      .optional()
+      .exists()
+      .withMessage("Subcategory was not provided")
       .bail()
       .notEmpty()
       .withMessage("Subcategory cannot be empty")
       .bail()
       .isString()
       .withMessage("Subcategory must be a string"),
-    body("thumbnail")
-      .exists()
-      .withMessage("Thumbnail was not provided")
-      .bail()
-      .notEmpty()
-      .withMessage("Thumbnail cannot be empty")
-      .bail()
-      .isString()
-      .withMessage("Thumbnail must be a string"),
-
-    body("level")
-      .exists()
-      .withMessage("Level was not provided")
-      .bail()
-      .notEmpty()
-      .withMessage("Level cannot be empty")
-      .bail()
-      .isString()
-      .withMessage("Level must be a string"),
     body("language")
       .exists()
       .withMessage("Language was not provided")
@@ -554,7 +536,24 @@ const courseValidator = {
       .bail()
       .isString()
       .withMessage("Tag must be a string"),
-
+    body("level")
+      .exists()
+      .withMessage("Level was not provided")
+      .bail()
+      .notEmpty()
+      .withMessage("Level cannot be empty")
+      .bail()
+      .isString()
+      .withMessage("Level must be a string"),
+    body("thumbnail")
+      .exists()
+      .withMessage("Thumbnail was not provided")
+      .bail()
+      .notEmpty()
+      .withMessage("Thumbnail cannot be empty")
+      .bail()
+      .isString()
+      .withMessage("Thumbnail must be a string"),
     body("sections")
       .optional()
       .bail()
@@ -595,8 +594,8 @@ const courseValidator = {
       .bail()
       .isString()
       .withMessage("Description must be a string")
-      .isLength({ max: 500 })
-      .withMessage("Description cannot be more than 500 characters"),
+      .isLength({ max: 10000 })
+      .withMessage("Description cannot be more than 10000 characters"),
     body("category")
       .optional()
       .bail()
@@ -726,18 +725,6 @@ const contentValidator = {
       .bail()
       .isIn(["video", "document"])
       .withMessage("Type must be either video or document"),
-    body("course")
-      .exists()
-      .withMessage("Course was not provided")
-      .bail()
-      .notEmpty()
-      .withMessage("Course cannot be empty")
-      .bail()
-      .isString()
-      .withMessage("Course must be a string")
-      .bail()
-      .isMongoId()
-      .withMessage("Course must be a valid mongo id"),
     body("section")
       .exists()
       .withMessage("Lesson was not provided")
@@ -750,6 +737,19 @@ const contentValidator = {
       .bail()
       .isLength({ max: 100 })
       .withMessage("Lesson cannot be more than 100 characters"),
+    body("course")
+      .exists()
+      .withMessage("Course was not provided")
+      .bail()
+      .notEmpty()
+      .withMessage("Course cannot be empty")
+      .bail()
+      .isString()
+      .withMessage("Course must be a string")
+      .bail()
+      .isMongoId()
+      .withMessage("Course must be a valid mongo id"),
+
     body("attachment")
       .optional()
       .bail()
@@ -819,7 +819,7 @@ const contentValidator = {
       .bail()
       .isMongoId()
       .withMessage("Course must be a valid mongo id"),
-      body("section")
+    body("section")
       .exists()
       .withMessage("Section was not provided")
       .bail()
@@ -868,7 +868,7 @@ const wishlistValidator = {
 };
 
 const supportValidator = {
-  add : [
+  add: [
     body("course")
       .exists()
       .withMessage("Course was not provided")
@@ -886,387 +886,388 @@ const supportValidator = {
       .withMessage("Message cannot be empty")
       .bail()
       .isString()
-      .withMessage("Message must be a string")
-  ]
-}
+      .withMessage("Message must be a string"),
+  ],
+};
 
 const assignmentValidator = {
-  add:[
-    body('name')
-    .exists()
-    .withMessage("Name was not provided")
-    .bail()
-    .notEmpty()
-    .withMessage("Name cannot be empty")
-    .bail()
-    .isString()
-    .withMessage("Name must be a string")
-    .isLength({ max: 30 })
-    .withMessage("Name cannot be more than 30 characters"),
-    body('description')
-    .exists()
-    .withMessage("Description was not provided")
-    .bail()
-    .notEmpty()
-    .withMessage("Description cannot be empty")
-    .bail()
-    .isString()
-    .withMessage("Description must be a string")
-    .isLength({ max: 100 })
-    .withMessage("Description cannot be more than 100 characters"),
-    body('attachments')
-    .optional()
-    .bail()
-    .isArray()
-    .withMessage("Attachments must be an array")
-    .bail()
-    .custom((value) => {
-      if (value.length > 0) {
-        value.forEach((attachment) => {
-          if (typeof attachment !== "string") {
-            throw new Error("Attachment must be a string");
-          }
-          if(attachment.length > 100){
-            throw new Error("Attachment cannot be more than 100 characters");
-          }
-          if(attachment.length < 1){
-            throw new Error("Attachment cannot be empty");
-          }
-        });
-      }
-      return true;
-    }),
-    body('dueDate')
-    .exists()
-    .withMessage("Due date was not provided")
-    .bail()
-    .notEmpty()
-    .withMessage("Due date cannot be empty")
-    .bail()
-    .isString()
-    .withMessage("Due date must be a string")
-    .bail()
-    .isLength({ max: 100 })
-    .withMessage("Due date cannot be more than 100 characters"),
-    body('course')
-    .exists()
-    .withMessage("Course was not provided")
-    .bail()
-    .notEmpty()
-    .withMessage("Course cannot be empty")
-    .bail()
-    .isString()
-    .withMessage("Course must be a string")
-    .bail()
-    .isMongoId()
-    .withMessage("Course must be a valid mongo id"),
+  add: [
+    body("name")
+      .exists()
+      .withMessage("Name was not provided")
+      .bail()
+      .notEmpty()
+      .withMessage("Name cannot be empty")
+      .bail()
+      .isString()
+      .withMessage("Name must be a string")
+      .isLength({ max: 30 })
+      .withMessage("Name cannot be more than 30 characters"),
+    body("description")
+      .exists()
+      .withMessage("Description was not provided")
+      .bail()
+      .notEmpty()
+      .withMessage("Description cannot be empty")
+      .bail()
+      .isString()
+      .withMessage("Description must be a string")
+      .isLength({ max: 100 })
+      .withMessage("Description cannot be more than 100 characters"),
+    body("attachments")
+      .optional()
+      .bail()
+      .isArray()
+      .withMessage("Attachments must be an array")
+      .bail()
+      .custom((value) => {
+        if (value.length > 0) {
+          value.forEach((attachment) => {
+            if (typeof attachment !== "string") {
+              throw new Error("Attachment must be a string");
+            }
+            if (attachment.length > 100) {
+              throw new Error("Attachment cannot be more than 100 characters");
+            }
+            if (attachment.length < 1) {
+              throw new Error("Attachment cannot be empty");
+            }
+          });
+        }
+        return true;
+      }),
+    body("dueDate")
+      .exists()
+      .withMessage("Due date was not provided")
+      .bail()
+      .notEmpty()
+      .withMessage("Due date cannot be empty")
+      .bail()
+      .isString()
+      .withMessage("Due date must be a string")
+      .bail()
+      .isLength({ max: 100 })
+      .withMessage("Due date cannot be more than 100 characters"),
+    body("course")
+      .exists()
+      .withMessage("Course was not provided")
+      .bail()
+      .notEmpty()
+      .withMessage("Course cannot be empty")
+      .bail()
+      .isString()
+      .withMessage("Course must be a string")
+      .bail()
+      .isMongoId()
+      .withMessage("Course must be a valid mongo id"),
   ],
-  update:[
-    body('name')
-    .optional()
-    .bail()
-    .notEmpty()
-    .withMessage("Name cannot be empty")
-    .bail()
-    .isString()
-    .withMessage("Name must be a string")
-    .isLength({ max: 30 })
-    .withMessage("Name cannot be more than 30 characters"),
-    body('description')
-    .optional()
-    .bail()
-    .notEmpty()
-    .withMessage("Description cannot be empty")
-    .bail()
-    .isString()
-    .withMessage("Description must be a string")
-    .isLength({ max: 100 })
-    .withMessage("Description cannot be more than 100 characters"),
-    body('attachments')
-    .optional()
-    .bail()
-    .isArray()
-    .withMessage("Attachments must be an array")
-    .bail()
-    .custom((value) => {
-      if (value.length > 0) {
-        value.forEach((attachment) => {
-          if (typeof attachment !== "string") {
-            throw new Error("Attachment must be a string");
-          }
-          if(attachment.length > 100){
-            throw new Error("Attachment cannot be more than 100 characters");
-          }
-          if(attachment.length < 1){
-            throw new Error("Attachment cannot be empty");
-          }
-        });
-      }
-      return true;
-    }),
-    body('dueDate')
-    .optional()
-    .bail()
-    .notEmpty()
-    .withMessage("Due date cannot be empty")
-    .bail()
-    .isString()
-    .withMessage("Due date must be a string")
-    .bail()
-    .isLength({ max: 100 })
-    .withMessage("Due date cannot be more than 100 characters"),
-    body('course')
-    .optional()
-    .bail()
-    .notEmpty()
-    .withMessage("Course cannot be empty")
-    .bail()
-    .isString()
-    .withMessage("Course must be a string")
-    .bail()
-    .isMongoId()
-    .withMessage("Course must be a valid mongo id"),
+  update: [
+    body("name")
+      .optional()
+      .bail()
+      .notEmpty()
+      .withMessage("Name cannot be empty")
+      .bail()
+      .isString()
+      .withMessage("Name must be a string")
+      .isLength({ max: 30 })
+      .withMessage("Name cannot be more than 30 characters"),
+    body("description")
+      .optional()
+      .bail()
+      .notEmpty()
+      .withMessage("Description cannot be empty")
+      .bail()
+      .isString()
+      .withMessage("Description must be a string")
+      .isLength({ max: 100 })
+      .withMessage("Description cannot be more than 100 characters"),
+    body("attachments")
+      .optional()
+      .bail()
+      .isArray()
+      .withMessage("Attachments must be an array")
+      .bail()
+      .custom((value) => {
+        if (value.length > 0) {
+          value.forEach((attachment) => {
+            if (typeof attachment !== "string") {
+              throw new Error("Attachment must be a string");
+            }
+            if (attachment.length > 100) {
+              throw new Error("Attachment cannot be more than 100 characters");
+            }
+            if (attachment.length < 1) {
+              throw new Error("Attachment cannot be empty");
+            }
+          });
+        }
+        return true;
+      }),
+    body("dueDate")
+      .optional()
+      .bail()
+      .notEmpty()
+      .withMessage("Due date cannot be empty")
+      .bail()
+      .isString()
+      .withMessage("Due date must be a string")
+      .bail()
+      .isLength({ max: 100 })
+      .withMessage("Due date cannot be more than 100 characters"),
+    body("course")
+      .optional()
+      .bail()
+      .notEmpty()
+      .withMessage("Course cannot be empty")
+      .bail()
+      .isString()
+      .withMessage("Course must be a string")
+      .bail()
+      .isMongoId()
+      .withMessage("Course must be a valid mongo id"),
   ],
-  score:[
-    body('score')
-    .exists()
-    .withMessage("Score was not provided")
-    .bail()
-    .notEmpty()
-    .withMessage("Score cannot be empty")
-    .bail()
-    .isNumeric()
-    .withMessage("Score must be a number")
-    .bail()
-    .isLength({ max: 6 })
-    .withMessage("Score cannot be more than 4 characters"),
-    body('feedback')
-    .exists()
-    .withMessage("Feedback was not provided")
-    .bail()
-    .notEmpty()
-    .withMessage("Feedback cannot be empty")
-    .bail()
-    .isString()
-    .withMessage("Feedback must be a string")
-    .bail()
-    .isLength({ max: 100 })
-    .withMessage("Feedback cannot be more than 100 characters"), 
-  ]
-}
+  score: [
+    body("score")
+      .exists()
+      .withMessage("Score was not provided")
+      .bail()
+      .notEmpty()
+      .withMessage("Score cannot be empty")
+      .bail()
+      .isNumeric()
+      .withMessage("Score must be a number")
+      .bail()
+      .isLength({ max: 6 })
+      .withMessage("Score cannot be more than 4 characters"),
+    body("feedback")
+      .exists()
+      .withMessage("Feedback was not provided")
+      .bail()
+      .notEmpty()
+      .withMessage("Feedback cannot be empty")
+      .bail()
+      .isString()
+      .withMessage("Feedback must be a string")
+      .bail()
+      .isLength({ max: 100 })
+      .withMessage("Feedback cannot be more than 100 characters"),
+  ],
+};
 
 const quizValidator = {
-  add:[
-    body('name')
-    .exists()
-    .withMessage("Name was not provided")
-    .bail()
-    .notEmpty()
-    .withMessage("Name cannot be empty")
-    .bail()
-    .isString()
-    .withMessage("Name must be a string")
-    .isLength({ max: 30 })
-    .withMessage("Name cannot be more than 30 characters"),
-    body('description')
-    .exists()
-    .withMessage("Description was not provided")
-    .bail()
-    .notEmpty()
-    .withMessage("Description cannot be empty")
-    .bail()
-    .isString()
-    .withMessage("Description must be a string")
-    .isLength({ max: 100 })
-    .withMessage("Description cannot be more than 100 characters"),
-    body('questions')
-    .exists()
-    .withMessage("Questions was not provided")
-    .bail()
-    .notEmpty()
-    .withMessage("Questions cannot be empty")
-    .bail()
-    .isArray()
-    .withMessage("Questions must be an array")
-    .bail()
-    .custom((value) => {
-      if (value.length > 0) {
-        value.forEach((question) => {
-          if (typeof question.questionText !== "string") {
-            throw new Error("Question must be a string");
-          }
-          if(question.questionText.length > 100){
-            throw new Error("Question cannot be more than 100 characters");
-          }
-          if(question.questionText.length < 1){
-            throw new Error("Question cannot be empty");
-          }
-          if (typeof question.options !== "object") {
-            throw new Error("Options must be an array");
-          }
-          if(question.options.length < 1){
-            throw new Error("Options cannot be empty");
-          }
-          if (typeof question.correctAnswer !== "number") {
-            throw new Error("Correct Answer must be a Number");
-          }
-          if(question.correctAnswer.length > 100){
-            throw new Error("Correct Answer cannot be more than 100 characters");
-          }
-          if(question.correctAnswer.length < 1){
-            throw new Error("Correct Answer cannot be empty");
-          }
-        });
-      }
-      return true;
-    }
-    ), 
-    body('timeLimit')
-    .exists()
-    .withMessage("Time limit was not provided")
-    .bail()
-    .notEmpty()
-    .withMessage("Time limit cannot be empty")
-    .bail()
-    .isNumeric()
-    .withMessage("Time limit must be a number")
-    .bail()
-    .isLength({ max: 6 })
-    .withMessage("Time limit cannot be more than 4 characters"),
-    body('course')
-    .exists()
-    .withMessage("Course was not provided")
-    .bail()
-    .notEmpty()
-    .withMessage("Course cannot be empty")
-    .bail()
-    .isString()
-    .withMessage("Course must be a string")
-    .bail()
-    .isMongoId()
-    .withMessage("Course must be a valid mongo id"),
+  add: [
+    body("name")
+      .exists()
+      .withMessage("Name was not provided")
+      .bail()
+      .notEmpty()
+      .withMessage("Name cannot be empty")
+      .bail()
+      .isString()
+      .withMessage("Name must be a string")
+      .isLength({ max: 30 })
+      .withMessage("Name cannot be more than 30 characters"),
+    body("description")
+      .exists()
+      .withMessage("Description was not provided")
+      .bail()
+      .notEmpty()
+      .withMessage("Description cannot be empty")
+      .bail()
+      .isString()
+      .withMessage("Description must be a string")
+      .isLength({ max: 100 })
+      .withMessage("Description cannot be more than 100 characters"),
+    body("questions")
+      .exists()
+      .withMessage("Questions was not provided")
+      .bail()
+      .notEmpty()
+      .withMessage("Questions cannot be empty")
+      .bail()
+      .isArray()
+      .withMessage("Questions must be an array")
+      .bail()
+      .custom((value) => {
+        if (value.length > 0) {
+          value.forEach((question) => {
+            if (typeof question.questionText !== "string") {
+              throw new Error("Question must be a string");
+            }
+            if (question.questionText.length > 100) {
+              throw new Error("Question cannot be more than 100 characters");
+            }
+            if (question.questionText.length < 1) {
+              throw new Error("Question cannot be empty");
+            }
+            if (typeof question.options !== "object") {
+              throw new Error("Options must be an array");
+            }
+            if (question.options.length < 1) {
+              throw new Error("Options cannot be empty");
+            }
+            if (typeof question.correctAnswer !== "number") {
+              throw new Error("Correct Answer must be a Number");
+            }
+            if (question.correctAnswer.length > 100) {
+              throw new Error(
+                "Correct Answer cannot be more than 100 characters"
+              );
+            }
+            if (question.correctAnswer.length < 1) {
+              throw new Error("Correct Answer cannot be empty");
+            }
+          });
+        }
+        return true;
+      }),
+    body("timeLimit")
+      .exists()
+      .withMessage("Time limit was not provided")
+      .bail()
+      .notEmpty()
+      .withMessage("Time limit cannot be empty")
+      .bail()
+      .isNumeric()
+      .withMessage("Time limit must be a number")
+      .bail()
+      .isLength({ max: 6 })
+      .withMessage("Time limit cannot be more than 4 characters"),
+    body("course")
+      .exists()
+      .withMessage("Course was not provided")
+      .bail()
+      .notEmpty()
+      .withMessage("Course cannot be empty")
+      .bail()
+      .isString()
+      .withMessage("Course must be a string")
+      .bail()
+      .isMongoId()
+      .withMessage("Course must be a valid mongo id"),
   ],
 
-  update:[
-    body('name')
-    .optional()
-    .bail()
-    .notEmpty()
-    .withMessage("Name cannot be empty")
-    .bail()
-    .isString()
-    .withMessage("Name must be a string")
-    .isLength({ max: 30 })
-    .withMessage("Name cannot be more than 30 characters"),
-    body('description')
-    .optional()
-    .bail()
-    .notEmpty()
-    .withMessage("Description cannot be empty")
-    .bail()
-    .isString()
-    .withMessage("Description must be a string")
-    .isLength({ max: 100 })
-    .withMessage("Description cannot be more than 100 characters"),
-    body('questions')
-    .optional()
-    .bail()
-    .notEmpty()
-    .withMessage("Questions cannot be empty")
-    .bail()
-    .isArray()
-    .withMessage("Questions must be an array")
-    .bail()
-    .custom((value) => {
-      if (value.length > 0) {
-        value.forEach((question) => {
-          if (typeof question.questionText !== "string") {
-            throw new Error("Question must be a string");
-          }
-          if(question.questionText.length > 100){
-            throw new Error("Question cannot be more than 100 characters");
-          }
-          if(question.questionText.length < 1){
-            throw new Error("Question cannot be empty");
-          }
-          if (typeof question.options !== "object") {
-            throw new Error("Options must be an array");
-          }
-          if(question.options.length < 1){
-            throw new Error("Options cannot be empty");
-          }
-          if (typeof question.correctAnswer !== "number") {
-            throw new Error("Correct Answer must be a Number");
-          }
-          if(question.correctAnswer.length > 100){
-            throw new Error("Correct Answer cannot be more than 100 characters");
-          }
-          if(question.correctAnswer.length < 1){
-            throw new Error("Correct Answer cannot be empty");
-          }
-        });
-      }
-      return true;
-    }
-    ),
-    body('timeLimit')
-    .optional()
-    .bail()
-    .notEmpty()
-    .withMessage("Time limit cannot be empty")
-    .bail()
-    .isNumeric()
-    .withMessage("Time limit must be a number")
-    .bail()
-    .isLength({ max: 6 })
-    .withMessage("Time limit cannot be more than 4 characters"),
-    body('course')
-    .optional()
-    .bail()
-    .notEmpty()
-    .withMessage("Course cannot be empty")
-    .bail()
-    .isString()
-    .withMessage("Course must be a string")
-    .bail()
-    .isMongoId()
-    .withMessage("Course must be a valid mongo id"),
+  update: [
+    body("name")
+      .optional()
+      .bail()
+      .notEmpty()
+      .withMessage("Name cannot be empty")
+      .bail()
+      .isString()
+      .withMessage("Name must be a string")
+      .isLength({ max: 30 })
+      .withMessage("Name cannot be more than 30 characters"),
+    body("description")
+      .optional()
+      .bail()
+      .notEmpty()
+      .withMessage("Description cannot be empty")
+      .bail()
+      .isString()
+      .withMessage("Description must be a string")
+      .isLength({ max: 100 })
+      .withMessage("Description cannot be more than 100 characters"),
+    body("questions")
+      .optional()
+      .bail()
+      .notEmpty()
+      .withMessage("Questions cannot be empty")
+      .bail()
+      .isArray()
+      .withMessage("Questions must be an array")
+      .bail()
+      .custom((value) => {
+        if (value.length > 0) {
+          value.forEach((question) => {
+            if (typeof question.questionText !== "string") {
+              throw new Error("Question must be a string");
+            }
+            if (question.questionText.length > 100) {
+              throw new Error("Question cannot be more than 100 characters");
+            }
+            if (question.questionText.length < 1) {
+              throw new Error("Question cannot be empty");
+            }
+            if (typeof question.options !== "object") {
+              throw new Error("Options must be an array");
+            }
+            if (question.options.length < 1) {
+              throw new Error("Options cannot be empty");
+            }
+            if (typeof question.correctAnswer !== "number") {
+              throw new Error("Correct Answer must be a Number");
+            }
+            if (question.correctAnswer.length > 100) {
+              throw new Error(
+                "Correct Answer cannot be more than 100 characters"
+              );
+            }
+            if (question.correctAnswer.length < 1) {
+              throw new Error("Correct Answer cannot be empty");
+            }
+          });
+        }
+        return true;
+      }),
+    body("timeLimit")
+      .optional()
+      .bail()
+      .notEmpty()
+      .withMessage("Time limit cannot be empty")
+      .bail()
+      .isNumeric()
+      .withMessage("Time limit must be a number")
+      .bail()
+      .isLength({ max: 6 })
+      .withMessage("Time limit cannot be more than 4 characters"),
+    body("course")
+      .optional()
+      .bail()
+      .notEmpty()
+      .withMessage("Course cannot be empty")
+      .bail()
+      .isString()
+      .withMessage("Course must be a string")
+      .bail()
+      .isMongoId()
+      .withMessage("Course must be a valid mongo id"),
   ],
-  submit:[
-    body('answers')
-    .exists()
-    .withMessage("Answers was not provided")
-    .bail()
-    .notEmpty()
-    .withMessage("Answers cannot be empty")
-    .bail()
-    .isArray()
-    .withMessage("Answers must be an array")
-    .bail()
-    .isLength({ max: 100 })
-    .withMessage("Answers cannot be more than 100 characters")
-    .custom((value) => {
-      if (value.length > 0) {
-        value.forEach((answer) => {
-          if (typeof answer !== "number") {
-            throw new Error("Answer must be a Number");
-          }
-          if(answer.length > 2){
-            throw new Error("Answer cannot be more than 2 characters");
-          }
-          if(answer.length < 1){
-            throw new Error("Answer cannot be empty");
-          }
-        });
-      }
-      if (value.length < 1) {
-        throw new Error("Answers cannot be empty");
-      }
-      return true;
-    }
-    ),
-  ]
-}
+  submit: [
+    body("answers")
+      .exists()
+      .withMessage("Answers was not provided")
+      .bail()
+      .notEmpty()
+      .withMessage("Answers cannot be empty")
+      .bail()
+      .isArray()
+      .withMessage("Answers must be an array")
+      .bail()
+      .isLength({ max: 100 })
+      .withMessage("Answers cannot be more than 100 characters")
+      .custom((value) => {
+        if (value.length > 0) {
+          value.forEach((answer) => {
+            if (typeof answer !== "number") {
+              throw new Error("Answer must be a Number");
+            }
+            if (answer.length > 2) {
+              throw new Error("Answer cannot be more than 2 characters");
+            }
+            if (answer.length < 1) {
+              throw new Error("Answer cannot be empty");
+            }
+          });
+        }
+        if (value.length < 1) {
+          throw new Error("Answers cannot be empty");
+        }
+        return true;
+      }),
+  ],
+};
 
 module.exports = {
   authvalidator,
@@ -1280,5 +1281,5 @@ module.exports = {
   wishlistValidator,
   supportValidator,
   assignmentValidator,
-  quizValidator
+  quizValidator,
 };

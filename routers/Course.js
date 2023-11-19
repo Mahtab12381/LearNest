@@ -15,5 +15,6 @@ routes.get('/all/published', CourseController.getAllPublished);
 routes.get('/all/published/:id', CourseController.getByidPublished);
 routes.patch('/publish/:id', CourseController.publishCourse);
 routes.get('/mycourses/all',isValidLearner, CourseController.getMyEnrolledCourses);
+routes.get("/mycreatedcourses/all",isValidInstructor, CourseController.getMyCreatedCourses);
 
 module.exports = routes;
