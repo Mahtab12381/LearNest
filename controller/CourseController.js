@@ -57,6 +57,7 @@ class CourseController {
         return response(res, HTTP_STATUS.BAD_REQUEST, errors.array());
       }
       const courses = await Course.find({ isDeleted: false })
+         .populate("created_by", "name imageUrl email")
         .select("-__v")
         .skip((page - 1) * limit)
         .limit(limit);
@@ -83,7 +84,7 @@ class CourseController {
         return response(res, HTTP_STATUS.BAD_REQUEST, errors.array());
       }
       const courses = await Course.find({ isDeleted: false, published: true })
-        .populate("created_by", "name imageUrl")
+        .populate("created_by", "name imageUrl email")
         .select("-__v")
         .skip((page - 1) * limit)
         .limit(limit);
@@ -275,6 +276,31 @@ class CourseController {
           res,
           HTTP_STATUS.OK,
           "Course published successfully",
+          course
+        );
+      }
+      return response(res, HTTP_STATUS.NOT_FOUND, "No Course Found");
+    } catch (e) {
+      return response(res, HTTP_STATUS.INTERNAL_SERVER_ERROR, "Internal Error");
+    }
+  }
+
+  async rejectCourse(req, res) {
+    try {
+      const id = req.params.id;
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        return response(res, HTTP_STATUS.BAD_REQUEST, "Invalid Id");
+      }
+      const course = await Course.findByIdAndUpdate(
+        id,
+        { rejected: true },
+        { new: true }
+      );
+      if (course) {
+        return response(
+          res,
+          HTTP_STATUS.OK,
+          "Course rejected successfully",
           course
         );
       }

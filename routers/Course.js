@@ -14,6 +14,7 @@ routes.delete('/delete/:id',CourseController.softDelete);
 routes.get('/all/published', CourseController.getAllPublished);
 routes.get('/all/published/:id', CourseController.getByidPublished);
 routes.patch('/publish/:id', CourseController.publishCourse);
+routes.patch('/reject/:id', CourseController.rejectCourse);
 routes.get('/mycourses/all',isValidLearner, CourseController.getMyEnrolledCourses);
 routes.get("/mycreatedcourses/all",isValidInstructor, CourseController.getMyCreatedCourses);
 

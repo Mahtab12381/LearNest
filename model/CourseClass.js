@@ -68,6 +68,11 @@ const CourseSchema = new mongoose.Schema(
             required: false,
             default: false
         },
+        rejected:{
+            type: Boolean,
+            required: false,
+            default: false
+        },
         isDeleted:{
             type: Boolean,
             required: false,
