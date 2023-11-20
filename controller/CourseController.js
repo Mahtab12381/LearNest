@@ -57,7 +57,7 @@ class CourseController {
         return response(res, HTTP_STATUS.BAD_REQUEST, errors.array());
       }
       const courses = await Course.find({ isDeleted: false })
-         .populate("created_by", "name imageUrl email")
+        .populate("created_by", "name imageUrl email")
         .select("-__v")
         .skip((page - 1) * limit)
         .limit(limit);
@@ -268,7 +268,7 @@ class CourseController {
       }
       const course = await Course.findByIdAndUpdate(
         id,
-        { published: true },
+        { published: true, rejected: false, tag:"New" },
         { new: true }
       );
       if (course) {
@@ -293,7 +293,7 @@ class CourseController {
       }
       const course = await Course.findByIdAndUpdate(
         id,
-        { rejected: true },
+        { rejected: true , published:false, tag:"Rejected" },
         { new: true }
       );
       if (course) {

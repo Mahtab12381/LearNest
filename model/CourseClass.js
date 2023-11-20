@@ -30,6 +30,7 @@ const CourseSchema = new mongoose.Schema(
         tag:{
             type: String,
             required: [true, "Tag is required"],
+            
         },
         rating: {
             type: Number,

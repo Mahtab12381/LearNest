@@ -82,7 +82,7 @@ class CartController {
                 updateList
             );
         } catch (e) {
-            return response(res, HTTP_STATUS.INTERNAL_SERVER_ERROR, "Internal Error");
+            return response(res, HTTP_STATUS.INTERNAL_SERVER_ERROR, "Internal Error",e);
         }
     }
 
@@ -125,11 +125,11 @@ class CartController {
             const learner_id = req.user._id;
             const Cart = await CartModel.findOne({learner: learner_id}).populate("courses" , "name _id rating thumbnail");
             if(!Cart){
-                return response(res, HTTP_STATUS.NOT_FOUND, "No Item in Cart");
+                return response(res, HTTP_STATUS.OK, "No Item in Cart");
             }
 
             if(Cart.courses.length === 0){
-                return response(res, HTTP_STATUS.NOT_FOUND, "No Item in Cart");
+                return response(res, HTTP_STATUS.OK, "No Item in Cart");
             }
             return response(
                 res,

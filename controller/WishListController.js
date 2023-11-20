@@ -109,13 +109,13 @@ class WishlistController {
     async getMyWishList(req, res) {
         try {
             const learner_id = req.user._id;
-            const wishlist = await Wishlist.findOne({learner: learner_id}).populate("courses" , "-reviews -contents -sections");
+            const wishlist = await Wishlist.findOne({learner: learner_id}).populate("courses" ,"name _id rating thumbnail");
             if(!wishlist){
-                return response(res, HTTP_STATUS.NOT_FOUND, "No Item in Wishlist");
+                return response(res, HTTP_STATUS.OK, "No Item in Wishlist");
             }
 
             if(wishlist.courses.length === 0){
-                return response(res, HTTP_STATUS.NOT_FOUND, "No Item in Wishlist");
+                return response(res, HTTP_STATUS.OK, "No Item in Wishlist");
             }
             return response(
                 res,
