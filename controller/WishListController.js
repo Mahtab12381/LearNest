@@ -1,6 +1,7 @@
 const Course = require("../model/CourseClass");
 const User = require("../model/UserClass");
 const Wishlist = require("../model/Wishlist");
+const Progress = require("../model/ProgressClass");
 const { validationResult } = require("express-validator");
 
 const response = require("../utility/common");
@@ -43,6 +44,24 @@ class WishlistController {
                     "Course already exists in wishlist"
                 );
             }
+
+            const extCourseProgress = await Progress.findOne({user: learner_id}).select("courseProgress");
+            if(extCourseProgress){
+                let matchedCourse = false;
+                extCourseProgress.courseProgress.forEach(course => {
+                    if(course.course == wishlist.course){
+                        matchedCourse = true;
+                    }
+                });
+                if(matchedCourse){
+                    return response(
+                        res,
+                        HTTP_STATUS.BAD_REQUEST,
+                        "Course already enrolled"
+                    );
+                }
+            }
+
             if(extWishlist){
                 const updatedList = await Wishlist.findByIdAndUpdate(extWishlist._id, { $push: { courses: wishlist.course } }, {new: true});
                 if(!updatedList){

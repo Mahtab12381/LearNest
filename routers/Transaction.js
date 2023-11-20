@@ -6,7 +6,7 @@ const { isValidAdmin } = require("../middleware/auth");
 const { isValidLearner } = require("../middleware/auth");
 
 routes.post("/add", isValidLearner, TransactionController.add);
-routes.patch("/cancel/:id", isValidLearner, TransactionController.cancel);
+routes.patch("/reject/:id", isValidAdmin, TransactionController.reject);
 routes.get("/view", isValidLearner, TransactionController.getMyTransaction);
 
 routes.get("/all", isValidAdmin, TransactionController.getAll);
