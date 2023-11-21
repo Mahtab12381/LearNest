@@ -4,6 +4,9 @@ const {isValidLearner} = require("../middleware/auth")
 const ProgressController = require("../controller/ProgressController");
 
 routes.patch("/set-active-content",isValidLearner,ProgressController.setActiveContent);
+routes.patch("/update-course-progress",isValidLearner,ProgressController.updatedProgress);
+routes.get("/get-progress/:courseId",isValidLearner,ProgressController.getCourseProgress);
+routes.get("/get-all-my-course-progress",isValidLearner,ProgressController.getAllMyCourseProgress)
 
 
 module.exports = routes;
