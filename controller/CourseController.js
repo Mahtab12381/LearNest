@@ -325,7 +325,7 @@ class CourseController {
         .select("courseProgress")
         .populate({
           path: "courseProgress.course",
-          select: "-__v",
+          select: "name rating thumbnail",
           match: { isDeleted: false, published: true },
         })
         .skip((page - 1) * limit)
