@@ -56,6 +56,7 @@ class CourseController {
       if (!errors.isEmpty()) {
         return response(res, HTTP_STATUS.BAD_REQUEST, errors.array());
       }
+
       const courses = await Course.find({ isDeleted: false })
         .populate("created_by", "name imageUrl email")
         .select("-__v")
@@ -80,22 +81,72 @@ class CourseController {
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 10;
       const errors = validationResult(req);
+
       if (!errors.isEmpty()) {
         return response(res, HTTP_STATUS.BAD_REQUEST, errors.array());
       }
-      const courses = await Course.find({ isDeleted: false, published: true })
+
+      const filters = {
+        isDeleted: false,
+        published: true,
+      };
+
+      if (req.query.name) {
+        filters.name = { $regex: new RegExp(req.query.name, "i") };
+      }
+
+      if(req.query.category){
+        filters.category = req.query.category;
+      }
+
+      if (req.query.subcategory) {
+        filters.subcategory = req.query.subcategory;
+      }
+
+      if (req.query.rating) {
+        filters.rating = { $gte: parseFloat(req.query.rating) };
+      }
+
+      if (req.query.level) {
+        filters.level = req.query.level;
+      }
+
+      if (req.query.language) {
+        filters.language = req.query.language;
+      }
+
+      const sortOptions = {};
+      if (req.query.sortBy) {
+        sortOptions[req.query.sortBy] =
+          req.query.sortByType === "desc" ? -1 : 1;
+      }
+
+      const courses = await Course.find(
+        filters
+      )
         .populate("created_by", "name imageUrl email")
         .select("-__v")
+        .sort(sortOptions)
         .skip((page - 1) * limit)
         .limit(limit);
+
+      const count = await Course.countDocuments(filters);
+
       if (courses.length > 0) {
         return response(
           res,
           HTTP_STATUS.OK,
           "Courses Data Received successfully",
-          courses
+          {
+          total: count,
+          page,
+          limit,
+          onThisPage: courses.length,
+          courses:courses,
+          }
         );
       }
+
       return response(res, HTTP_STATUS.NOT_FOUND, "No Courses Found");
     } catch (e) {
       return response(res, HTTP_STATUS.INTERNAL_SERVER_ERROR, "Internal Error");
@@ -268,7 +319,7 @@ class CourseController {
       }
       const course = await Course.findByIdAndUpdate(
         id,
-        { published: true, rejected: false, tag:"New" },
+        { published: true, rejected: false, tag: "New" },
         { new: true }
       );
       if (course) {
@@ -293,7 +344,7 @@ class CourseController {
       }
       const course = await Course.findByIdAndUpdate(
         id,
-        { rejected: true , published:false, tag:"Rejected" },
+        { rejected: true, published: false, tag: "Rejected" },
         { new: true }
       );
       if (course) {

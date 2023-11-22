@@ -4,7 +4,6 @@ const mongoose = require("mongoose");
 const Progress = require("../model/ProgressClass");
 const Course = require("../model/CourseClass");
 
-
 const { validationResult } = require("express-validator");
 
 class ProgressController {
@@ -146,7 +145,7 @@ class ProgressController {
       countTotal = extCourse.contents.length;
     }
 
-    const percentage = (countCompleted / countTotal) * 100;
+    const percentage = ((countCompleted + 1) / countTotal) * 100;
 
     const updatePercentage = await Progress.findOneAndUpdate(
       {
@@ -156,6 +155,7 @@ class ProgressController {
       {
         $set: {
           "courseProgress.$.percentageComplete": percentage,
+          "courseProgress.$.lastAccessed": Date.now(),
         },
       },
       { new: true }
@@ -219,7 +219,9 @@ class ProgressController {
     try {
       const progress = await Progress.find({
         user: req.user._id,
-      }).select("courseProgress").populate("courseProgress.course", "name rating");
+      })
+        .select("courseProgress")
+        .populate("courseProgress.course", "name rating");
 
       if (!progress) {
         return response(
