@@ -96,7 +96,8 @@ class CourseController {
       }
 
       if(req.query.category){
-        filters.category = req.query.category;
+        const category= await Category.findOne({name:req.query.category}).select("_id");
+        filters.category = category;
       }
 
       if (req.query.subcategory) {
@@ -104,7 +105,7 @@ class CourseController {
       }
 
       if (req.query.rating) {
-        filters.rating = { $gte: parseFloat(req.query.rating) };
+        filters.rating = { $gte: parseFloat(req.query.rating) , $lte: parseFloat(req.query.rating) + 1 };
       }
 
       if (req.query.level) {

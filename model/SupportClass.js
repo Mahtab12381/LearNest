@@ -17,9 +17,10 @@ const SupportSchema = new mongoose.Schema(
           message: {
             type: String,
           },
-        },
-        {
-          timestamps: true,
+          date: {
+            type: Date,
+            default: Date.now,
+          },
         }
       ],
         required: false,

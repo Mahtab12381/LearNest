@@ -132,7 +132,10 @@ class SupportClass {
         }
       }
 
-      const extsupport = await Support.findOne({ course: course });
+      const extsupport = await Support.findOne({ course: course }).populate(
+        "discussion.user_id",
+        "name imageUrl email"
+      );
       if (!extsupport) {
         return response(res, HTTP_STATUS.BAD_REQUEST, "No support found");
       }
