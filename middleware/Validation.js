@@ -901,8 +901,8 @@ const assignmentValidator = {
       .bail()
       .isString()
       .withMessage("Name must be a string")
-      .isLength({ max: 30 })
-      .withMessage("Name cannot be more than 30 characters"),
+      .isLength({ max: 100 })
+      .withMessage("Name cannot be more than 100 characters"),
     body("description")
       .exists()
       .withMessage("Description was not provided")
@@ -912,8 +912,8 @@ const assignmentValidator = {
       .bail()
       .isString()
       .withMessage("Description must be a string")
-      .isLength({ max: 100 })
-      .withMessage("Description cannot be more than 100 characters"),
+      .isLength({ max: 150 })
+      .withMessage("Description cannot be more than 150 characters"),
     body("attachments")
       .optional()
       .bail()
@@ -936,18 +936,18 @@ const assignmentValidator = {
         }
         return true;
       }),
-    body("dueDate")
+    body("mark")
       .exists()
-      .withMessage("Due date was not provided")
+      .withMessage("Mark was not provided")
       .bail()
       .notEmpty()
-      .withMessage("Due date cannot be empty")
+      .withMessage("Mark cannot be empty")
       .bail()
-      .isString()
-      .withMessage("Due date must be a string")
+      .isInt()
+      .withMessage("Mark must be a number")
       .bail()
       .isLength({ max: 100 })
-      .withMessage("Due date cannot be more than 100 characters"),
+      .withMessage("Mark cannot be more than 100 characters"),
     body("course")
       .exists()
       .withMessage("Course was not provided")
@@ -970,8 +970,8 @@ const assignmentValidator = {
       .bail()
       .isString()
       .withMessage("Name must be a string")
-      .isLength({ max: 30 })
-      .withMessage("Name cannot be more than 30 characters"),
+      .isLength({ max: 100 })
+      .withMessage("Name cannot be more than 100 characters"),
     body("description")
       .optional()
       .bail()
@@ -980,8 +980,8 @@ const assignmentValidator = {
       .bail()
       .isString()
       .withMessage("Description must be a string")
-      .isLength({ max: 100 })
-      .withMessage("Description cannot be more than 100 characters"),
+      .isLength({ max: 150 })
+      .withMessage("Description cannot be more than 150 characters"),
     body("attachments")
       .optional()
       .bail()
@@ -1004,17 +1004,17 @@ const assignmentValidator = {
         }
         return true;
       }),
-    body("dueDate")
+    body("mark")
       .optional()
       .bail()
       .notEmpty()
-      .withMessage("Due date cannot be empty")
+      .withMessage("Mark cannot be empty")
       .bail()
-      .isString()
-      .withMessage("Due date must be a string")
+      .isInt()
+      .withMessage("Mark must be a Number")
       .bail()
       .isLength({ max: 100 })
-      .withMessage("Due date cannot be more than 100 characters"),
+      .withMessage("Mark cannot be more than 100 characters"),
     body("course")
       .optional()
       .bail()

@@ -13,7 +13,7 @@ class AssignmentClass {
       if (!errors.isEmpty()) {
         return response(res, HTTP_STATUS.BAD_REQUEST, errors.array());
       }
-      const { name, description, attachments, dueDate, course } = req.body;
+      const { name, description, attachments, mark, course } = req.body;
       const userId = req.user._id;
       const courseObj = await Course.findById(course);
       if (!courseObj) {
@@ -32,7 +32,7 @@ class AssignmentClass {
         name,
         description,
         attachments,
-        dueDate,
+        mark,
         course,
         created_by: userId,
       });
@@ -118,6 +118,96 @@ class AssignmentClass {
     }
   }
 
+  async getAssignmentByCourse(req, res) {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return response(res, HTTP_STATUS.BAD_REQUEST, errors.array());
+      }
+      const course = req.params.id;
+      const extCourse = await Course.findById(course);
+      if (!extCourse) {
+        return response(res, HTTP_STATUS.BAD_REQUEST, "Course does not exist");
+      }
+
+      if (req.role == "instructor") {
+        const extCourseinstructor = await Course.findOne({
+          _id: course,
+          created_by: req.user._id,
+        });
+        if (!extCourseinstructor) {
+          return response(
+            res,
+            HTTP_STATUS.BAD_REQUEST,
+            "You are not the instructor of this course"
+          );
+        }
+      }
+
+      const extCourseProgress = await Progress.findOne({
+        user: req.user._id,
+      }).select("courseProgress");
+      if (extCourseProgress) {
+        let matchedCourse = false;
+        extCourseProgress.courseProgress.forEach((course) => {
+          if (course.course == req.params.id) {
+            matchedCourse = true;
+          }
+        });
+        if (!matchedCourse) {
+          return response(res, HTTP_STATUS.BAD_REQUEST, "You are not enrolled");
+        }
+      }
+
+      const extAssignment = await Assignment.find({
+        course: course,
+        isDeleted: false,
+      });
+      if (!extAssignment) {
+        return response(res, HTTP_STATUS.BAD_REQUEST, "No assignment found");
+      }
+      return response(
+        res,
+        HTTP_STATUS.OK,
+        "Assignment Data Received successfully",
+        extAssignment
+      );
+    } catch (error) {
+      return response(
+        res,
+        HTTP_STATUS.INTERNAL_SERVER_ERROR,
+        "Internal Error",
+        error
+      );
+    }
+  }
+
+  async getmyCreatedAssignment(req, res) {
+    try {
+      const userId = req.user._id;
+      const extAssignment = await Assignment.find({
+        created_by: userId,
+        isDeleted: false,
+      });
+      if (!extAssignment) {
+        return response(res, HTTP_STATUS.BAD_REQUEST, "No assignment found");
+      }
+      return response(
+        res,
+        HTTP_STATUS.OK,
+        "Assignment Data Received successfully",
+        extAssignment
+      );
+    } catch (error) {
+      return response(
+        res,
+        HTTP_STATUS.INTERNAL_SERVER_ERROR,
+        "Internal Error",
+        error
+      );
+    }
+  }
+
   async updateAssignment(req, res) {
     try {
       const errors = validationResult(req);
@@ -125,7 +215,7 @@ class AssignmentClass {
         return response(res, HTTP_STATUS.BAD_REQUEST, errors.array());
       }
 
-      const { name, description, attachments, dueDate, course } = req.body;
+      const { name, description, attachments, mark, course } = req.body;
       const assignmentId = req.params.id;
       const assignmentObj = await Assignment.findById(assignmentId);
       if (!assignmentObj) {
@@ -157,7 +247,7 @@ class AssignmentClass {
           name,
           description,
           attachments,
-          dueDate,
+          mark,
           course,
           created_by: userId,
         },
@@ -302,6 +392,31 @@ class AssignmentClass {
         res,
         HTTP_STATUS.OK,
         "Score added successfully",
+        extProgress
+      );
+    } catch (error) {
+      return response(
+        res,
+        HTTP_STATUS.INTERNAL_SERVER_ERROR,
+        "Internal Error",
+        error
+      );
+    }
+  }
+
+  async getmySubmittedAssignment(req, res) {
+    try {
+      const userId = req.user._id;
+      const extProgress = await Progress.findOne({
+        user: userId,
+      }).select("assignmentProgress");
+      if (!extProgress) {
+        return response(res, HTTP_STATUS.NOT_FOUND, "Progress not found");
+      }
+      return response(
+        res,
+        HTTP_STATUS.OK,
+        "Assignment Data Received successfully",
         extProgress
       );
     } catch (error) {

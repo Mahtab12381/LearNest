@@ -12,6 +12,9 @@ routers.patch("/update/:id",isValidInstructor,assignmentValidator.update,Assignm
 routers.patch("/delete/:id",isValidInstructor,AssignmentController.deleteAssignment);
 routers.post("/submit/:id",isValidLearner,AssignmentController.submitAssignment);
 routers.post("/scorepost/:id/:assignment",isValidInstructor,assignmentValidator.score,AssignmentController.submitScore);
+routers.get("/bycourse/:id",isValidLearnerOrInstructor,AssignmentController.getAssignmentByCourse);
+routers.get("/mycreatedassignment",isValidLearnerOrInstructor,AssignmentController.getmyCreatedAssignment);
+routers.get("/mysubmittedassignment",isValidLearnerOrInstructor,AssignmentController.getmySubmittedAssignment);
 
 
 

@@ -12,9 +12,9 @@ const AssignmentSchema = new mongoose.Schema({
     attachments: {
         type: [String]
     },
-    dueDate: {
-        type: Date,
-        required: [true, "Due date is required"]
+    mark: {
+        type: Number,
+        required: [true, "Mark is required"]
     },
     course: {
         type: mongoose.Schema.Types.ObjectId,
