@@ -5,6 +5,7 @@ const Progress = require("../model/ProgressClass");
 const { validationResult } = require("express-validator");
 const HTTP_STATUS = require("../constants/statusCodes");
 const response = require("../utility/common");
+const mongoose = require("mongoose");
 
 class AssignmentClass {
   async add(req, res) {
@@ -55,10 +56,20 @@ class AssignmentClass {
   async getAssignment(req, res) {
     try {
       const assignmentId = req.params.id;
+
       const assignmentObj = await Assignment.findOne({
         _id: assignmentId,
         isDeleted: false,
-      });
+    }).populate({
+        path: 'submissions',
+        match: {
+            'assignmentProgress.user': req.user._id,
+        },
+        select: 'assignmentProgress',
+    });
+
+
+    
       if (!assignmentObj) {
         return response(res, HTTP_STATUS.NOT_FOUND, "Assignment not found");
       }
@@ -427,6 +438,63 @@ class AssignmentClass {
         error
       );
     }
+  }
+
+  async getSubmittionsByAssignment(req, res) {
+    try {
+      const assignmentId = req.params.id;
+      const assignmentObj = await Assignment.findById(assignmentId);
+      if (!assignmentObj) {
+        return response(res, HTTP_STATUS.NOT_FOUND, "Assignment not found");
+      }
+      const userId = req.user._id;
+      if (assignmentObj.created_by != userId) {
+        return response(
+          res,
+          HTTP_STATUS.FORBIDDEN,
+          "You are not allowed to view this assignment"
+        );
+      }
+      const extProgress = await Progress.find({
+        _id: { $in: assignmentObj.submissions },
+      }).populate("user","name email imageUrl");
+      if (!extProgress) {
+        return response(res, HTTP_STATUS.NOT_FOUND, "Progress not found");
+      }
+
+      let pppp = [];
+      extProgress.forEach((progress) => {
+        progress.assignmentProgress.forEach((assignment) => {
+          if (assignment.assignmentId == assignmentId) {
+            pppp.push({
+              _id: progress._id,
+              name: progress.user.name,
+              email: progress.user.email,
+              imageUrl: progress.user.imageUrl,
+              assignmentId:assignment.assignmentId,
+              feedback: assignment.feedback,
+              score: assignment.score,
+              attachment: assignment.attachments,
+              submissionDate: assignment.submissionDate,
+            });
+          }
+        });
+      });
+
+      return response(
+        res,
+        HTTP_STATUS.OK,
+        "Assignment Data Received successfully",
+        pppp
+      );
+    } catch (error) {
+      return response(
+        res,
+        HTTP_STATUS.INTERNAL_SERVER_ERROR,
+        "Internal Error",
+        error
+      );
+    } 
   }
 }
 

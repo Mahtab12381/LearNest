@@ -15,6 +15,7 @@ routers.post("/scorepost/:id/:assignment",isValidInstructor,assignmentValidator.
 routers.get("/bycourse/:id",isValidLearnerOrInstructor,AssignmentController.getAssignmentByCourse);
 routers.get("/mycreatedassignment",isValidLearnerOrInstructor,AssignmentController.getmyCreatedAssignment);
 routers.get("/mysubmittedassignment",isValidLearnerOrInstructor,AssignmentController.getmySubmittedAssignment);
+routers.get("/get-submittions-by-assignment/:id",isValidInstructor,AssignmentController.getSubmittionsByAssignment);
 
 
 

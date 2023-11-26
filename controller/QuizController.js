@@ -142,7 +142,7 @@ class QuizClass {
 
   async getbyID(req, res) {
     try {
-      const quiz = await Quiz.findById(req.params.id);
+      const quiz = await Quiz.findById(req.params.id).select("-questions.correctAnswer");
 
       if (!quiz) {
         return response(res, HTTP_STATUS.BAD_REQUEST, "Quiz does not exist");
@@ -212,7 +212,7 @@ class QuizClass {
         const quiz = await Quiz.find({
           course: course,
           isDeleted: false,
-        });
+        }).select("-questions.correctAnswer");
         if (quiz.length == 0) {
           return response(res, HTTP_STATUS.BAD_REQUEST, "There is no quiz");
         }
@@ -290,11 +290,13 @@ class QuizClass {
         }
       }
 
-      console.log(req.params.id)
+      console.log(req.params.id);
       const expiryTime = await Progress.findOne({
         user: req.user._id,
         "quizProgress.quizId": req.params.id,
-      }).select("quizProgress.quizId quizProgress.exireAt quizProgress.completed");
+      }).select(
+        "quizProgress.quizId quizProgress.exireAt quizProgress.completed"
+      );
 
       const extQuizbyLearner = expiryTime.quizProgress.filter((quiz) => {
         return quiz.quizId.toString() == req.params.id.toString();
@@ -321,7 +323,7 @@ class QuizClass {
         return response(
           res,
           HTTP_STATUS.BAD_REQUEST,
-          `${correctAnswers.length-submittedAnswers.length} answers left`
+          `${correctAnswers.length - submittedAnswers.length} answers left`
         );
       }
 
@@ -438,7 +440,7 @@ class QuizClass {
             quiz.completed == false
           ) {
             matchedQuiz = true;
-            attempts = quiz.attempts; 
+            attempts = quiz.attempts;
           }
         });
         if (completedQuiuz) {
@@ -456,7 +458,7 @@ class QuizClass {
             },
             {
               $set: {
-                "quizProgress.$.attempts":attempts+ 1,
+                "quizProgress.$.attempts": attempts + 1,
                 "quizProgress.$.exireAt": Date.now() + quiz.timeLimit * 60000,
               },
             },
@@ -512,6 +514,42 @@ class QuizClass {
         "Internal Error",
         err
       );
+    }
+  }
+
+  async getMyCreatedQuiz(req, res) {
+    try {
+      const quiz = await Quiz.find({
+        created_by: req.user._id,
+        isDeleted: false,
+      });
+      if (quiz.length == 0) {
+        return response(res, HTTP_STATUS.BAD_REQUEST, "There is no quiz");
+      }
+      return response(res, HTTP_STATUS.OK, "Quiz retrived succesfully", quiz);
+    } catch (err) {
+      console.log(err);
+      return response(res, HTTP_STATUS.INTERNAL_SERVER_ERROR, err);
+    }
+  }
+
+  async getMySubmittedQuiz(req, res) {
+    try {
+      const extQuizzes = await Progress.findOne({
+        user: req.user._id,
+      }).select("quizProgress");
+      if (extQuizzes) {
+        return response(
+          res,
+          HTTP_STATUS.OK,
+          "Quiz retrived succesfully",
+          extQuizzes.quizProgress
+        );
+      }
+      return response(res, HTTP_STATUS.BAD_REQUEST, "No quiz submitted");
+    } catch (err) {
+      console.log(err);
+      return response(res, HTTP_STATUS.INTERNAL_SERVER_ERROR, err);
     }
   }
 }

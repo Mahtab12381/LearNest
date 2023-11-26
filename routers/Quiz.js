@@ -13,8 +13,6 @@ routers.get('/bycourse/:id', isValidLearnerOrInstructor,QuizController.getByCour
 routers.get('/id/:id', isValidLearnerOrInstructor,QuizController.getbyID);
 routers.post('/submit/:id', isValidLearner,quizValidator.submit,QuizController.submitQuiz);
 routers.post('/start/:id', isValidLearner,QuizController.startQuiz);
-
-
-
-
+routers.get('/mycreatedquiz', isValidInstructor,QuizController.getMyCreatedQuiz);
+routers.get('/mysubmittedquiz', isValidLearner,QuizController.getMySubmittedQuiz);
 module.exports = routers;
