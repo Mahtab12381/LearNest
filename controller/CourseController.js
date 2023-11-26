@@ -6,6 +6,10 @@ const response = require("../utility/common");
 const HTTP_STATUS = require("../constants/statusCodes");
 const mongoose = require("mongoose");
 const Progress = require("../model/ProgressClass");
+const ejs = require("ejs");
+const path = require("path");
+const sendEmail = require("../utility/sendEmail");
+
 
 class CourseController {
   async add(req, res) {
@@ -313,7 +317,7 @@ class CourseController {
   }
 
   async publishCourse(req, res) {
-    try {
+     try {
       const id = req.params.id;
       if (!mongoose.Types.ObjectId.isValid(id)) {
         return response(res, HTTP_STATUS.BAD_REQUEST, "Invalid Id");
@@ -322,8 +326,13 @@ class CourseController {
         id,
         { published: true, rejected: false, tag: "New" },
         { new: true }
-      );
+      ).populate("created_by", "name email");
       if (course) {
+        const renderedHtml = await ejs.renderFile(
+          path.join(__dirname, "../views/coursePublished.ejs"),
+          { name:course.created_by.name, link: process.env.VITE_REACT_BASE+"course/" + course._id}
+        );
+        sendEmail(course.created_by.email, "Course Publication", renderedHtml);
         return response(
           res,
           HTTP_STATUS.OK,
@@ -347,8 +356,13 @@ class CourseController {
         id,
         { rejected: true, published: false, tag: "Rejected" },
         { new: true }
-      );
+      ).populate("created_by", "name email");
       if (course) {
+        const renderedHtml = await ejs.renderFile(
+          path.join(__dirname, "../views/coursePublished.ejs"),
+          { name:course.created_by.name, link: process.env.VITE_REACT_BASE+"course/" + course._id}
+        );
+        sendEmail(course.created_by.email, "Course Publication", renderedHtml);
         return response(
           res,
           HTTP_STATUS.OK,
