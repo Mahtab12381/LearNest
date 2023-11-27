@@ -1269,6 +1269,53 @@ const quizValidator = {
   ],
 };
 
+
+const notificationValidator={
+  add:[
+    body("user")
+    .exists()
+    .withMessage("User was not provided")
+    .bail()
+    .notEmpty()
+    .withMessage("User cannot be empty")
+    .bail()
+    .isString()
+    .withMessage("User must be a string")
+    .bail()
+    .isMongoId()
+    .withMessage("User must be a valid mongo id"),
+    body("message")
+    .exists()
+    .withMessage("Message was not provided")
+    .bail()
+    .notEmpty()
+    .withMessage("Message cannot be empty")
+    .bail()
+    .isString()
+    .withMessage("Message must be a string")
+    .isLength({ max: 300 })
+    .withMessage("Message cannot be more than 300 characters"),
+    body("type")
+    .exists()
+    .withMessage("Type was not provided")
+    .bail()
+    .notEmpty()
+    .withMessage("Type cannot be empty")
+    .bail()
+    .isString()
+    .withMessage("Type must be a string"),
+  body("link")
+    .optional()
+    .bail()
+    .notEmpty()
+    .withMessage("Link cannot be empty")
+    .bail()
+    .isString()
+    .withMessage("Link must be a string")
+    .isLength({ max: 100 })
+    .withMessage("Link cannot be more than 100 characters"),
+  ],
+}
 module.exports = {
   authvalidator,
   cartValidator,
@@ -1282,4 +1329,5 @@ module.exports = {
   supportValidator,
   assignmentValidator,
   quizValidator,
+  notificationValidator
 };

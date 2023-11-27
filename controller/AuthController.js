@@ -79,9 +79,11 @@ class Authcontroller {
         { "email.id": email },
         { $set: { locked: false, unloackTime: Date.now(), attempt: 0 } }
       );
+      const extUser = await User.findOne({ email: email });
       return response(res, HTTP_STATUS.OK, "Successfully Logged in", {
         role: user.role,
         token: token,
+        id: extUser._id,
       });
     } catch (e) {
       return response(
@@ -142,7 +144,7 @@ class Authcontroller {
 
           const updateUser = await User.findOneAndUpdate(
             { email: email },
-            { $set: { name: name, address: address } }
+            { $set: { name: name, address: address } },
           );
 
           const sent = await sendVerifyEmail(email, name);

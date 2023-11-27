@@ -1,11 +1,16 @@
 const Cart = require("../model/CartClass");
 const Progress = require("../model/ProgressClass");
 const Transaction = require("../model/TransactionClass");
+const Notification = require("../model/Notification");
 const User = require("../model/UserClass");
 const mongoose = require("mongoose");
 const { validationResult } = require("express-validator");
 const HTTP_STATUS = require("../constants/statusCodes");
 const response = require("../utility/common");
+const ejs = require("ejs");
+const path = require("path");
+const sendEmail = require("../utility/sendEmail");
+
 
 class TransactionController {
   async add(req, res) {
@@ -42,6 +47,26 @@ class TransactionController {
       const newTransaction = await Transaction.create(transaction);
       if (newTransaction) {
         await Cart.findByIdAndDelete(extcart._id);
+        const renderedHtml = await ejs.renderFile(
+          path.join(__dirname, "../views/commonTemplete.ejs"),
+          {
+            header: "Subscription Information",
+            name: process.env.ADMIN_NAME,
+            body: "New Subscription request Arrived. Please check the details below:",
+            link: process.env.VITE_REACT_BASE + "dashboard/admin/subscriptions",
+            btnText: "View Subscription",
+            footer: "Thanks for using our service.",
+          }
+        );
+        sendEmail(process.env.ADMIN_EMAIL, "New Subscription Request", renderedHtml);
+
+        await Notification.create({
+          user: process.env.ADMIN_ID,
+          message: "New Subscription request Arrived",
+          type: "subscription",
+          link: "/dashboard/admin/subscriptions",
+        });
+
       }
       return response(
         res,
@@ -133,7 +158,7 @@ class TransactionController {
       if (!mongoose.Types.ObjectId.isValid(transaction_id)) {
         return response(res, HTTP_STATUS.BAD_REQUEST, "Invalid Id");
       }
-      const transaction = await Transaction.findById(transaction_id);
+      const transaction = await Transaction.findById(transaction_id).populate("user", "name email imageUrl");
       if (transaction) {
         if (transaction.approved) {
           return response(
@@ -182,6 +207,27 @@ class TransactionController {
             courseProgress: courseprogress,
           });
         }
+
+        const renderedHtml = await ejs.renderFile(
+          path.join(__dirname, "../views/commonTemplete.ejs"),
+          {
+            header: "Subscription Information",
+            name: transaction.user.name,
+            body: "Your Subscription request has been approved. Please check the course below:",
+            link: process.env.VITE_REACT_BASE + "dashboard/learner/mycourses",
+            btnText: "View Course",
+            footer: "Thanks for using our service.",
+          }
+        );
+        sendEmail(transaction.user.email, "Subscription Approved", renderedHtml);
+
+        await Notification.create({
+          user: transaction.user,
+          message: "Your Subscription request has been approved",
+          type: "subscription",
+          link: "/dashboard/learner/mycourses",
+        });
+
         return response(
           res,
           HTTP_STATUS.OK,
@@ -298,20 +344,20 @@ class TransactionController {
       if (!mongoose.Types.ObjectId.isValid(transaction_id)) {
         return response(res, HTTP_STATUS.BAD_REQUEST, "Invalid Id");
       }
-      const transaction = await Transaction.findById(transaction_id);
+      const transaction = await Transaction.findById(transaction_id).populate("user", "name email imageUrl");
       if (transaction) {
         if (transaction.approved) {
           return response(
             res,
             HTTP_STATUS.BAD_REQUEST,
-            "Transaction already approved"
+            "Subscription already approved"
           );
         }
         if (transaction.cancelled) {
             return response(
               res,
               HTTP_STATUS.BAD_REQUEST,
-              "Transaction already Declined"
+              "Subscription already Declined"
             );
           }
         const cancelTransaction = await Transaction.findByIdAndUpdate(
@@ -319,10 +365,31 @@ class TransactionController {
           { cancelled: true, approved: false },
           { new: true }
         );
+
+        const renderedHtml = await ejs.renderFile(
+          path.join(__dirname, "../views/commonTemplete.ejs"),
+          {
+            header: "Subscription Information",
+            name: transaction.user.name,
+            body: "Your Subscription has been declined. To subscribe again please click the button below:",
+            link: process.env.VITE_REACT_BASE + "courses",
+            btnText: "View Courses",
+            footer: "Thanks for using our service.",
+          }
+        );
+        sendEmail(transaction.user.email, "Subscription Declined", renderedHtml);
+
+        await Notification.create({
+          user: transaction.user,
+          message: "Your Subscription has been declined",
+          type: "subscription",
+          link: "/courses",
+        });
+
         return response(
           res,
           HTTP_STATUS.OK,
-          "Transaction Data Received successfully",
+          "Subscription Declined successfully",
           cancelTransaction
         );
       }

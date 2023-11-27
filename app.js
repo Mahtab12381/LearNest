@@ -23,6 +23,7 @@ const supportRouter = require("./routers/Support");
 const assignmentRouter = require("./routers/Assignment");
 const QuizRouter = require("./routers/Quiz");
 const ProgressRouter = require("./routers/Progress");
+const NotificationRouter = require("./routers/Notification");
 
 const path = require("path");
 const morgan = require('morgan')
@@ -74,6 +75,7 @@ app.use("/api/support", supportRouter);
 app.use("/api/assignment", assignmentRouter);
 app.use("/api/quiz", QuizRouter);
 app.use("/api/progress", ProgressRouter);
+app.use("/api/notification", NotificationRouter);
 
 
 

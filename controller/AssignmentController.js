@@ -6,6 +6,11 @@ const { validationResult } = require("express-validator");
 const HTTP_STATUS = require("../constants/statusCodes");
 const response = require("../utility/common");
 const mongoose = require("mongoose");
+const path = require("path");
+const ejs = require("ejs");
+const sendEmail = require("../utility/sendEmail");
+const Notification = require("../model/Notification");
+
 
 class AssignmentClass {
   async add(req, res) {
@@ -315,7 +320,7 @@ class AssignmentClass {
   async submitAssignment(req, res) {
     try {
       const assignmentId = req.params.id;
-      const assignmentObj = await Assignment.findById(assignmentId);
+      const assignmentObj = await Assignment.findById(assignmentId).populate("created_by" , "name email");
       if (!assignmentObj) {
         return response(res, HTTP_STATUS.NOT_FOUND, "Assignment not found");
       }
@@ -358,6 +363,26 @@ class AssignmentClass {
         { new: true }
       );
 
+      const renderedHtml = await ejs.renderFile(
+        path.join(__dirname, "../views/commonTemplete.ejs"),
+        {
+          header: "Assignment Information",
+          name: assignmentObj.created_by.name,
+          body: "New assignment submission arrived. Please check the assignment and provide feedback. click the link below:",
+          link: process.env.VITE_REACT_BASE + "dashboard/instructor/assignment-submissions-view/" + assignmentObj._id,
+          btnText: "View Submission",
+          footer: "Thanks for using our service. Hope you enjoy it.",
+        }
+      );
+      sendEmail(assignmentObj.created_by.email, "Assignment Submission Arrived", renderedHtml);
+      
+      await Notification.create({
+        user: assignmentObj.created_by._id,
+        message: "New assignment submission arrived.",
+        type: "assignment",
+        link: "/dashboard/instructor/assignment-submissions-view/" + assignmentObj._id,
+      });
+
       return response(
         res,
         HTTP_STATUS.OK,
@@ -365,6 +390,7 @@ class AssignmentClass {
         submittedAssignmentObj
       );
     } catch (error) {
+      console.log(error);
       return response(
         res,
         HTTP_STATUS.INTERNAL_SERVER_ERROR,
@@ -384,9 +410,11 @@ class AssignmentClass {
       const { score, feedback } = req.body;
       const progressionId = req.params.id;
       const assignmentID = req.params.assignment;
+
+      const extAssignment = await Assignment.findById(assignmentID);
       const extProgress = await Progress.findOne({
         _id: progressionId,
-      }).select("assignmentProgress");
+      }).select("assignmentProgress").populate("user","name email imageUrl");
 
       if (!extProgress) {
         return response(res, HTTP_STATUS.NOT_FOUND, "Progress not found");
@@ -399,6 +427,28 @@ class AssignmentClass {
         }
       });
       await extProgress.save();
+
+      const renderedHtml = await ejs.renderFile(
+        path.join(__dirname, "../views/commonTemplete.ejs"),
+        {
+          header: "Assignment Information",
+          name: extProgress.user.name,
+          body: "You recieved Feedback and Score for your assignment. Click the link below to check:",
+          link: process.env.VITE_REACT_BASE + "dashboard/learner/mycourses/" + extAssignment.course,
+          btnText: "View Feedback",
+          footer: "Thanks for using our service. Hope you enjoy it.",
+        }
+      );
+      sendEmail(extProgress.user.email, "Assignment Feedback received", renderedHtml);
+
+      await Notification.create({
+        user: extProgress.user._id,
+        message: "You recieved Feedback and Score for your assignment.",
+        type: "feedback",
+        link: "/dashboard/learner/mycourses/" + extAssignment.course,
+      });
+
+
       return response(
         res,
         HTTP_STATUS.OK,

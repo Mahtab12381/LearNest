@@ -14,6 +14,14 @@ const NotificationSchema = new mongoose.Schema({
         type: Boolean,
         required: false,
         default: false
+    },
+    type: {
+        type: String,
+        required: [true, "Type is required"]
+    },
+    link: {
+        type: String,
+        required: true
     }
 }, {
     timestamps: true

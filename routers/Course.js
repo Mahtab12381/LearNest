@@ -17,5 +17,6 @@ routes.patch('/publish/:id', CourseController.publishCourse);
 routes.patch('/reject/:id', CourseController.rejectCourse);
 routes.get('/mycourses/all',isValidLearner, CourseController.getMyEnrolledCourses);
 routes.get("/mycreatedcourses/all",isValidInstructor, CourseController.getMyCreatedCourses);
+routes.post("/sendpublicationmail/:id",isValidInstructor, CourseController.sendPublicationMail);
 
 module.exports = routes;

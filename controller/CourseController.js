@@ -9,7 +9,7 @@ const Progress = require("../model/ProgressClass");
 const ejs = require("ejs");
 const path = require("path");
 const sendEmail = require("../utility/sendEmail");
-
+const Notification = require("../model/Notification.js");
 
 class CourseController {
   async add(req, res) {
@@ -55,7 +55,7 @@ class CourseController {
   async getAll(req, res) {
     try {
       const page = parseInt(req.query.page) || 1;
-      const limit = parseInt(req.query.limit) || 10;
+      const limit = parseInt(req.query.limit) || 30;
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return response(res, HTTP_STATUS.BAD_REQUEST, errors.array());
@@ -83,7 +83,7 @@ class CourseController {
   async getAllPublished(req, res) {
     try {
       const page = parseInt(req.query.page) || 1;
-      const limit = parseInt(req.query.limit) || 10;
+      const limit = parseInt(req.query.limit) || 30;
       const errors = validationResult(req);
 
       if (!errors.isEmpty()) {
@@ -99,8 +99,10 @@ class CourseController {
         filters.name = { $regex: new RegExp(req.query.name, "i") };
       }
 
-      if(req.query.category){
-        const category= await Category.findOne({name:req.query.category}).select("_id");
+      if (req.query.category) {
+        const category = await Category.findOne({
+          name: req.query.category,
+        }).select("_id");
         filters.category = category;
       }
 
@@ -109,7 +111,10 @@ class CourseController {
       }
 
       if (req.query.rating) {
-        filters.rating = { $gte: parseFloat(req.query.rating) , $lte: parseFloat(req.query.rating) + 1 };
+        filters.rating = {
+          $gte: parseFloat(req.query.rating),
+          $lte: parseFloat(req.query.rating) + 1,
+        };
       }
 
       if (req.query.level) {
@@ -126,9 +131,7 @@ class CourseController {
           req.query.sortByType === "desc" ? -1 : 1;
       }
 
-      const courses = await Course.find(
-        filters
-      )
+      const courses = await Course.find(filters)
         .populate("created_by", "name imageUrl email")
         .select("-__v")
         .sort(sortOptions)
@@ -143,11 +146,11 @@ class CourseController {
           HTTP_STATUS.OK,
           "Courses Data Received successfully",
           {
-          total: count,
-          page,
-          limit,
-          onThisPage: courses.length,
-          courses:courses,
+            total: count,
+            page,
+            limit,
+            onThisPage: courses.length,
+            courses: courses,
           }
         );
       }
@@ -317,7 +320,7 @@ class CourseController {
   }
 
   async publishCourse(req, res) {
-     try {
+    try {
       const id = req.params.id;
       if (!mongoose.Types.ObjectId.isValid(id)) {
         return response(res, HTTP_STATUS.BAD_REQUEST, "Invalid Id");
@@ -330,9 +333,20 @@ class CourseController {
       if (course) {
         const renderedHtml = await ejs.renderFile(
           path.join(__dirname, "../views/coursePublished.ejs"),
-          { name:course.created_by.name, link: process.env.VITE_REACT_BASE+"course/" + course._id}
+          {
+            name: course.created_by.name,
+            link: process.env.VITE_REACT_BASE + "course/" + course._id,
+          }
         );
         sendEmail(course.created_by.email, "Course Publication", renderedHtml);
+
+        await Notification.create({
+          user: course.created_by,
+          message: "Your course has been published",
+          type: "course",
+          link:"/course/" + course._id,
+        });
+
         return response(
           res,
           HTTP_STATUS.OK,
@@ -359,10 +373,24 @@ class CourseController {
       ).populate("created_by", "name email");
       if (course) {
         const renderedHtml = await ejs.renderFile(
-          path.join(__dirname, "../views/coursePublished.ejs"),
-          { name:course.created_by.name, link: process.env.VITE_REACT_BASE+"course/" + course._id}
+          path.join(__dirname, "../views/commonTemplete.ejs"),
+          {
+            header: "Course Information",
+            name: course.created_by.name,
+            body: "Your course has been rejected. Please check terms and conditions and try again.Click The Link below to see tha course",
+            link: process.env.VITE_REACT_BASE + "course/" + course._id,
+            btnText: "View Course",
+            footer: "Thanks for using our service. Better luck next time.",
+          }
         );
-        sendEmail(course.created_by.email, "Course Publication", renderedHtml);
+        sendEmail(course.created_by.email, "Course Rejection", renderedHtml);
+        await Notification.create({
+          user: course.created_by,
+          message: "Your course has been rejected",
+          type: "course",
+          link: "/course/" + course._id,
+        });
+
         return response(
           res,
           HTTP_STATUS.OK,
@@ -380,7 +408,7 @@ class CourseController {
     try {
       const userId = req.user._id;
       const page = parseInt(req.query.page) || 1;
-      const limit = parseInt(req.query.limit) || 10;
+      const limit = parseInt(req.query.limit) || 30;
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return response(res, HTTP_STATUS.BAD_REQUEST, errors.array());
@@ -414,7 +442,7 @@ class CourseController {
     try {
       const userId = req.user._id;
       const page = parseInt(req.query.page) || 1;
-      const limit = parseInt(req.query.limit) || 10;
+      const limit = parseInt(req.query.limit) || 30;
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return response(res, HTTP_STATUS.BAD_REQUEST, errors.array());
@@ -435,6 +463,46 @@ class CourseController {
         );
       }
       return response(res, HTTP_STATUS.NOT_FOUND, "No Courses Found");
+    } catch (e) {
+      return response(res, HTTP_STATUS.INTERNAL_SERVER_ERROR, "Internal Error");
+    }
+  }
+  async sendPublicationMail(req, res) {
+    try {
+      const id = req.params.id;
+      const course = await Course.findById(id).populate(
+        "created_by",
+        "name email"
+      );
+      if (course) {
+        const renderedHtml = await ejs.renderFile(
+          path.join(__dirname, "../views/commonTemplete.ejs"),
+          {
+            header: "Course Information",
+            name: process.env.ADMIN_NAME,
+            body: "New Course has been arrived.Please check and publish it.Click The Link below to see the course",
+            link: process.env.VITE_REACT_BASE + "course/" + id,
+            btnText: "View Course",
+            footer: "Thanks for using our service.",
+          }
+        );
+        sendEmail(process.env.ADMIN_EMAIL, "New Course Arrived", renderedHtml);
+
+        await Notification.create({
+          user: process.env.ADMIN_ID,
+          message: "New course has been arrived",
+          type: "course",
+          link: "/course/" + id,
+        });
+
+        return response(
+          res,
+          HTTP_STATUS.OK,
+          "Course published successfully",
+          course
+        );
+      }
+      return response(res, HTTP_STATUS.NOT_FOUND, "No Course Found");
     } catch (e) {
       return response(res, HTTP_STATUS.INTERNAL_SERVER_ERROR, "Internal Error");
     }
