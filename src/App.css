@@ -1,0 +1,95 @@
+::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background-color: #5F2DED;
+    border-radius: 6px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background-color: #F1F1F1;
+  }
+  
+  /* Tailwind CSS classes for scroll bar styles */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+  
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+
+  /* styles.css */
+
+.scrollbar-hidden::-webkit-scrollbar {
+    display: none; /* Hide scrollbar for WebKit (Chrome, Safari) */
+  }
+  
+  .scrollbar-hidden {
+    scrollbar-width: thin; /* Hide scrollbar for Firefox */
+  }
+  
+  .scrollbar-hidden::-webkit-scrollbar-thumb {
+    background-color: transparent; /* Make the scrollbar thumb transparent for WebKit */
+  }
+  
+  .quil-text h1 {
+    font-size: 2rem;
+    font-weight: 500;
+    line-height: 1.2;
+    opacity: 0.7;
+  }
+
+  .quil-text h2 {
+    font-size: 1.75rem;
+    font-weight: 500;
+    line-height: 1.2;
+    opacity: 0.7;
+  }
+
+  .quil-text h3 {
+    font-size: 1.5rem;
+    font-weight: 5500;
+    line-height: 1.2;
+    opacity: 0.7;
+  }
+
+  .quil-text h4 {
+    font-size: 1.25rem;
+    font-weight: 500;
+    line-height: 1.2;
+    opacity: 0.7;
+  }
+
+  .quil-text h5 {
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: 1.2;
+    opacity: 0.7;
+  }
+
+  .quil-text h6 {
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.2;
+    opacity: 0.7;
+  }
+
+  .quil-text ol {
+    list-style-type: decimal;
+  }
+
+  .quil-text ul {
+    list-style-type: disc;
+  }
+
+  .quil-text ul li{
+    margin-left: 3rem;
+  }
+
+  .quil-text ol li{
+    margin-left: 3rem;
+  }
+
+  
