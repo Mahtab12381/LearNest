@@ -24,7 +24,7 @@ const UserSchema = new mongoose.Schema({
     imageUrl: {
         type: String,
         required:false,
-        default:"myimg.png"
+        default:"images/myimg.png"
     },
     city: {
         type: String,

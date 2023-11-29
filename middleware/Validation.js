@@ -294,8 +294,8 @@ const userValidator = {
       .isString()
       .withMessage("Role must be a string")
       .bail()
-      .isIn(["user", "premium_user"])
-      .withMessage("Role must be either user or premium_user"),
+      .isIn(["learner", "instructor","admin"])
+      .withMessage("Role "),
   ],
   updateProfile: [
     body("name")

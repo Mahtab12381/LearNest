@@ -13,7 +13,7 @@ routes.get("/admin/:id",isValidAdmin,UserController.getUserById);
 routes.patch("/update/:id",isValidAdmin,userValidator.update,UserController.updateUser);
 routes.delete("/delete/:id",isValidAdmin,UserController.deleteUser);
 routes.get("/my-profile",isValidAdminOrLearnerOrInstructor,UserController.getMyProfile);
-routes.post("/update-profile",isValidLearner,userValidator.updateProfile,UserController.updateProfile);
+routes.post("/update-profile",isValidAdminOrLearnerOrInstructor,userValidator.updateProfile,UserController.updateProfile);
 
 
 

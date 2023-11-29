@@ -420,7 +420,6 @@ class CourseController {
         .populate({
           path: "courseProgress.course",
           select: "name rating thumbnail",
-          match: { published: true },
         })
         .skip((page - 1) * limit)
         .limit(limit);

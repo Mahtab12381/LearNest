@@ -3,6 +3,11 @@ const HTTP_STATUS = require("../constants/statusCodes");
 const mongoose = require("mongoose");
 const Progress = require("../model/ProgressClass");
 const Course = require("../model/CourseClass");
+const User = require("../model/UserClass");
+const Transaction = require("../model/TransactionClass");
+const Assignment = require("../model/AssignmentClass");
+const Quiz = require("../model/QuizClass");
+const Content = require("../model/ContentClass");
 
 const { validationResult } = require("express-validator");
 
@@ -210,6 +215,28 @@ class ProgressController {
         "Course Progress fetched",
         progress.courseProgress[0]
       );
+    } catch (err) {
+      return response(res, HTTP_STATUS.INTERNAL_SERVER_ERROR, err.message);
+    }
+  }
+
+  async getDashboardData(req, res) {
+    try {
+      const course = await Course.find().countDocuments();
+      const user =await User.find().countDocuments();
+      const transaction = await Transaction.find().countDocuments();
+      const assignment = await Assignment.find().countDocuments();
+      const quiz = await Quiz.find().countDocuments();
+      const content = await Content.find().countDocuments();
+
+      return response(res, HTTP_STATUS.OK, "Dashboard data fetched", {
+        course,
+        user,
+        transaction,
+        assignment,
+        quiz,
+        content,
+      });
     } catch (err) {
       return response(res, HTTP_STATUS.INTERNAL_SERVER_ERROR, err.message);
     }
